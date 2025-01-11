@@ -4,7 +4,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Header } from '@/components/Header';
 import { Breadcrumb } from '@/components/Breadcrumb';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PUBLIC_ROUTES } from '@/lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 export function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
   // Handle hydration
@@ -19,20 +20,31 @@ export function AuthenticatedLayout({ children }: { children: React.ReactNode })
     setIsMounted(true);
   }, []);
 
+  // Handle authentication
+  useEffect(() => {
+    if (!isLoading && !user && !PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+      router.push('/login');
+    }
+  }, [user, isLoading, pathname, router]);
+
   // Don't show header for public routes or when user is not authenticated
   const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
 
+  // Show header only for authenticated users on non-public routes
+  const showHeader = user && !isPublicRoute;
+
   // If still loading auth state or not mounted, show loading spinner
-  if (isLoading || !isMounted) {
+  if (!isMounted) {
+    return null; // Prevent hydration mismatch
+  }
+
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
   }
-
-  // Show header only for authenticated users on non-public routes
-  const showHeader = user && !isPublicRoute;
 
   return (
     <div className="min-h-screen bg-background">

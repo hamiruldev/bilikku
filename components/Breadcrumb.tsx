@@ -11,7 +11,7 @@ export function Breadcrumb() {
   if (paths.length === 0) return null;
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-6">
+    <nav className="flex items-center space-x-2 text-sm text-muted-foreground mb-6 flex-wrap gap-1">
       <Link
         href="/dashboard"
         className="flex items-center hover:text-foreground transition-colors"

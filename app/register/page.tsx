@@ -317,6 +317,15 @@ export default function RegisterPage() {
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
+
+            <div className="text-center mt-4">
+              <p className="text-sm text-muted-foreground">
+                Already have an account?{' '}
+                <Link href="/login" className="text-primary hover:opacity-90 transition-opacity">
+                  Sign in
+                </Link>
+              </p>
+            </div>
           </form>
         </div>
       </div>

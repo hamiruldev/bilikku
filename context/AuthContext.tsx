@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import PocketBase from 'pocketbase';
+import { pb } from '@/lib/pocketbase';
 import { superuserClient, authenticateSuperuser } from '@/lib/superuserClient';
 
 interface User {
@@ -19,10 +19,8 @@ interface AuthContextType {
   login: (email: string, password: string, isSuperAdmin?: boolean) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
-  pb: PocketBase;
+  pb: typeof pb;
 }
-
-const pb = new PocketBase('https://hamirulhafizal.pockethost.io');
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,108 +30,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkUserRole = async (userId: string) => {
     try {
-
       const user = await pb.collection('tenant_roles').getFirstListItem(`user="${userId}"`);
-
-      const roleId = user.role
-
+      const roleId = user.role;
       const Role = await pb.collection('roles').getFirstListItem(`id="${roleId}"`);
 
       return {
         role: Role.name,
-        tenantId: null
+        tenantId: 'rb0s8fazmuf44ac'
       };
-
-
-      
-      // if (userRole) {
-      //   try {
-      //     const tenant = await pb.collection('bilikku_tenants').getFirstListItem(`user_id="${userId}"`);
-      //     return {
-      //       role: userRole.role,
-      //       tenantId: tenant?.id || null
-      //     };
-      //   } catch (error) {
-      //     return {
-      //       role: userRole.role,
-      //       tenantId: null
-      //     };
-      //   }
-      // }
-
-      // const adminEmails = ['admin@bilikku.com', 'hafizal@bilikku.com'];
-      // const userData = pb.authStore.model;
-      
-      // if (userData && adminEmails.includes(userData.email)) {
-      //   return {
-      //     role: 'admin',
-      //     tenantId: null
-      //   };
-      // }
-
-      // return {
-      //   role: 'guest',
-      //   tenantId: null
-      // };
-
     } catch (error) {
       console.error('Error checking user role:', error);
       return {
         role: 'guest',
-        tenantId: null
+        tenantId: 'rb0s8fazmuf44ac'
       };
     }
   };
 
+  // Initialize auth state
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     const initializeAuth = async () => {
       try {
-        pb.authStore.loadFromCookie(document?.cookie ?? '');
-        superuserClient.authStore.loadFromCookie(document?.cookie ?? '');
-        
-        const authModel = pb.authStore.model || superuserClient.authStore.model;
-        
-        if (authModel) {
-          const { role, tenantId } = await checkUserRole(authModel.id);
-          
-          setUser({
-            id: authModel.id,
-            email: authModel.email,
-            role: role,
-            username: authModel.username,
-            isAdmin: role === 'admin',
-            isSuperAdmin: !!superuserClient.authStore.isValid,
-            tenantId: tenantId
-          });
+        // Try to load the auth state from the cookie
+
+        console.log("pb.authStore---->", pb.authStore)
+
+
+        if (pb.authStore.isValid) {
+          const authModel = pb.authStore.model;
+          if (authModel) {
+            const { role, tenantId } = await checkUserRole(authModel.id);
+            setUser({
+              id: authModel.id,
+              email: authModel.email,
+              role: role,
+              username: authModel.username,
+              isAdmin: role === 'admin',
+              isSuperAdmin: false,
+              tenantId: tenantId
+            });
+          }
+        } else if (superuserClient.authStore.isValid) {
+          const superAuthModel = superuserClient.authStore.model;
+          if (superAuthModel) {
+            setUser({
+              id: superAuthModel.id,
+              email: superAuthModel.email,
+              role: 'superadmin',
+              username: superAuthModel.email.split('@')[0],
+              isAdmin: true,
+              isSuperAdmin: true,
+              tenantId: 'rb0s8fazmuf44ac'
+            });
+          }
+        } else {
+          setUser(null);
         }
       } catch (error) {
         console.error('Auth initialization error:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     };
 
+    // Set up auth store change listeners
+    const unsubscribe = pb.authStore.onChange(() => {
+      initializeAuth();
+    });
+
+    const unsubscribeSuperuser = superuserClient.authStore.onChange(() => {
+      initializeAuth();
+    });
+
+    // Initial auth check
     initializeAuth();
-  }, []);
 
-  // Add console log for debugging
-  console.log('AuthProvider state:', { user, isLoading });
-
-  useEffect(() => {
-    pb.authStore.onChange(() => {
-      document.cookie = pb.authStore.exportToCookie();
-    });
-
-    superuserClient.authStore.onChange(() => {
-      document.cookie = superuserClient.authStore.exportToCookie();
-    });
+    // Cleanup
+    return () => {
+      unsubscribe?.();
+      unsubscribeSuperuser?.();
+    };
   }, []);
 
   const login = async (email: string, password: string, isSuperAdmin = false) => {
     try {
       if (isSuperAdmin) {
         const isAuthenticated = await authenticateSuperuser(email, password);
-        if (isAuthenticated) {
+        if (isAuthenticated && superuserClient.authStore.model) {
           const authModel = superuserClient.authStore.model;
           setUser({
             id: authModel.id,
@@ -141,7 +128,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             role: 'superadmin',
             username: email.split('@')[0],
             isAdmin: true,
-            isSuperAdmin: true
+            isSuperAdmin: true,
+            tenantId: 'rb0s8fazmuf44ac'
           });
           return;
         }
@@ -160,7 +148,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           username: authData.record.username,
           isAdmin: role === 'admin',
           isSuperAdmin: false,
-          tenantId: 'rb0s8fazmuf44ac'
+          tenantId: tenantId
         });
       }
     } catch (error) {
@@ -173,6 +161,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     pb.authStore.clear();
     superuserClient.authStore.clear();
     setUser(null);
+    // Clear cookies
+    document.cookie = 'pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
   };
 
   return (

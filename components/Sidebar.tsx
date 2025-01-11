@@ -3,7 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { XMarkIcon, UserCircleIcon, HomeIcon, CogIcon, ArrowLeftOnRectangleIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, UserCircleIcon, HomeIcon, CogIcon, ArrowLeftOnRectangleIcon, BuildingOfficeIcon, UsersIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -75,6 +75,30 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
               >
                 <BuildingOfficeIcon className="w-5 h-5" />
                 <span>Sublets</span>
+              </Link>
+            )}
+
+            {/* Add Rooms Link (only visible for admin) */}
+            {user?.isAdmin && (
+              <Link
+                href="/dashboard/rooms"
+                className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <BuildingOfficeIcon className="w-5 h-5" />
+                <span>Rooms</span>
+              </Link>
+            )}
+
+            {/* Add Tenants Link (only visible for admin) */}
+            {user?.isAdmin && (
+              <Link
+                href="/dashboard/tenants"
+                className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+                onClick={onClose}
+              >
+                <UsersIcon className="w-5 h-5" />
+                <span>Tenants</span>
               </Link>
             )}
 

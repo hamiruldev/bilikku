@@ -49,6 +49,7 @@ export default function DashboardPage() {
     lastPaymentDate: '',
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -62,33 +63,38 @@ export default function DashboardPage() {
     const loadDashboardData = async () => {
       try {
         if (user?.isAdmin) {
-
-
-          console.log("pb---->", pb)
+          // Disable auto-cancellation for these requests
+          pb.autoCancellation(false);
 
           // Load admin stats
-          const [rooms, tenants, pendingPayments, monthlyPayments] = await Promise.all([
+          const [rooms, tenants] = await Promise.all([
             pb.collection('bilikku_rooms').getList(1, 50),
             pb.collection('bilikku_tenants').getList(1, 50),
-            pb.collection('bilikku_payments').getList(1, 50, {
-              filter: 'status = "pending"'
-            }),
-            pb.collection('bilikku_payments').getList(1, 100, {
-              filter: `status = "completed" && MONTH(payment_date) = ${new Date().getMonth() + 1}`
-            })
+            // pb.collection('bilikku_payments').getList(1, 50, {
+            //   filter: 'status = "pending"'
+            // }),
+            // pb.collection('bilikku_payments').getList(1, 100, {
+            //   filter: `status = "completed" && MONTH(payment_date) = ${new Date().getMonth() + 1}`
+            // })
           ]);
+
+          // Re-enable auto-cancellation after requests are complete
+          pb.autoCancellation(true);
 
           if (isSubscribed) {
             setAdminStats({
               totalRooms: rooms.totalItems,
               occupiedRooms: rooms.items.filter(room => room.status === 'occupied').length,
               availableRooms: rooms.items.filter(room => room.status === 'available').length,
-              totalTenants: tenants.totalItems,
-              pendingPayments: pendingPayments.totalItems,
-              monthlyRevenue: monthlyPayments.items.reduce((sum, payment) => sum + (payment.amount || 0), 0),
+              totalTenants: tenants.totalItems
+            //   pendingPayments: pendingPayments.totalItems,
+            //   monthlyRevenue: monthlyPayments.items.reduce((sum, payment) => sum + (payment.amount || 0), 0),
             });
           }
         } else {
+          // Disable auto-cancellation for tenant requests
+          pb.autoCancellation(false);
+
           // Load tenant stats
           const tenant = await pb.collection('bilikku_tenants').getFirstListItem(`user_id="${user?.id}"`);
           const room = await pb.collection('bilikku_rooms').getOne(tenant.room_id);
@@ -96,6 +102,9 @@ export default function DashboardPage() {
             filter: `tenant_id="${tenant.id}"`,
             sort: '-payment_date'
           });
+
+          // Re-enable auto-cancellation after requests are complete
+          pb.autoCancellation(true);
 
           if (isSubscribed) {
             setTenantStats({
@@ -107,10 +116,10 @@ export default function DashboardPage() {
             });
           }
         }
-      } catch (error) {
-        if (isSubscribed) {
-          console.error('Error loading dashboard data:', error);
-        }
+        setError(null);
+      } catch (error: any) {
+        console.error('Error loading dashboard data:', error);
+        setError(error?.message || 'Failed to load dashboard data');
       } finally {
         if (isSubscribed) {
           setLoading(false);
@@ -124,13 +133,34 @@ export default function DashboardPage() {
 
     return () => {
       isSubscribed = false;
+      // Ensure auto-cancellation is re-enabled when component unmounts
+      pb.autoCancellation(true);
     };
   }, [user, pb]);
 
-  if (isLoading || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-destructive mb-4">Error: {error}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -174,7 +204,7 @@ export default function DashboardPage() {
                 icon={<CurrencyDollarIcon className="w-6 h-6" />}
                 title="Payments"
                 stats={[
-                  { label: 'Monthly Revenue', value: `RM ${adminStats.monthlyRevenue.toFixed(2)}` },
+                  { label: 'Monthly Revenue', value: `RM ${adminStats.monthlyRevenue?.toFixed(2)}` },
                   { label: 'Pending', value: adminStats.pendingPayments },
                 ]}
               />
