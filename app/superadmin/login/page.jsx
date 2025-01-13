@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../../../context/AuthContext';
 
 export default function SuperAdminLoginPage() {
   const { login } = useAuth();
@@ -14,7 +14,7 @@ export default function SuperAdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -22,7 +22,7 @@ export default function SuperAdminLoginPage() {
     try {
       await login(email, password, true); // true for superadmin login
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Auth error:', error);
       setError('Invalid superadmin credentials');
     } finally {

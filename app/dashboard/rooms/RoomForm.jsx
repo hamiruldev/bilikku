@@ -1,33 +1,10 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-
-interface RoomFormPageProps {
-  action?: string;
-}
-
-interface RoomFormData {
-  number: string;
-  type: string;
-  floor: string;
-  status: 'available' | 'occupied' | 'maintenance';
-  rent_amount: number;
-  deposit_amount: number;
-  description: string;
-  sublet_id: string;
-  amenities: string[];
-  size_sqft: number;
-  max_occupants: number;
-}
-
-interface Sublet {
-  id: string;
-  name: string;
-}
 
 const ROOM_TYPES = [
   'Single Room',
@@ -52,7 +29,7 @@ const COMMON_AMENITIES = [
   'Water Heater'
 ];
 
-const initialFormData: RoomFormData = {
+const initialFormData = {
   number: '',
   type: '',
   floor: '',
@@ -66,15 +43,15 @@ const initialFormData: RoomFormData = {
   max_occupants: 1,
 };
 
-export default function RoomFormPage({ action }: RoomFormPageProps) {
+export default function RoomForm({ action }) {
   const { pb } = useAuth();
   const router = useRouter();
   const isEditing = action && action !== 'new';
 
-  const [formData, setFormData] = useState<RoomFormData>(initialFormData);
+  const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sublets, setSublets] = useState<Sublet[]>([]);
+  const [sublets, setSublets] = useState([]);
   const [newAmenity, setNewAmenity] = useState('');
 
   useEffect(() => {
@@ -90,8 +67,8 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
         sort: 'name',
         fields: 'id,name'
       });
-      setSublets(records.items as Sublet[]);
-    } catch (err: any) {
+      setSublets(records.items);
+    } catch (err) {
       console.error('Error loading sublets:', err);
       setError('Failed to load sublets');
     }
@@ -99,18 +76,18 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
 
   const loadRoom = async () => {
     try {
-      const record = await pb.collection('bilikku_rooms').getOne(action!);
+      const record = await pb.collection('bilikku_rooms').getOne(action);
       setFormData({
         ...record,
         amenities: record.amenities || [],
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error loading room:', err);
       setError(err.message || 'Failed to load room');
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
@@ -122,12 +99,12 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
       };
 
       if (isEditing) {
-        await pb.collection('bilikku_rooms').update(action!, dataToSend);
+        await pb.collection('bilikku_rooms').update(action, dataToSend);
       } else {
         await pb.collection('bilikku_rooms').create(dataToSend);
       }
       router.push('/dashboard/rooms');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error saving room:', err);
       setError(err.message || 'Failed to save room');
     } finally {
@@ -135,7 +112,7 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
     }
   };
 
-  const handleAmenityToggle = (amenity: string) => {
+  const handleAmenityToggle = (amenity) => {
     setFormData(prev => ({
       ...prev,
       amenities: prev.amenities.includes(amenity)
@@ -273,7 +250,7 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          status: e.target.value as 'available' | 'occupied' | 'maintenance'
+                          status: e.target.value
                         })
                       }
                       required
@@ -447,4 +424,4 @@ export default function RoomFormPage({ action }: RoomFormPageProps) {
       </div>
     </div>
   );
-} 
+}

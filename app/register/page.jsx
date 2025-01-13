@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -20,19 +20,19 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState<'available' | 'taken' | 'checking' | 'idle'>('idle');
+  const [usernameStatus, setUsernameStatus] = useState('idle');
 
   // Debounce function to prevent too many API calls
-  const debounce = (func: Function, wait: number) => {
-    let timeout: NodeJS.Timeout;
-    return (...args: any[]) => {
+  const debounce = (func, wait) => {
+    let timeout;
+    return (...args) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), wait);
     };
   };
 
   // Check username availability
-  const checkUsername = async (username: string) => {
+  const checkUsername = async (username) => {
     if (!username || username.length < 3) return;
     
     setUsernameStatus('checking');
@@ -51,7 +51,7 @@ export default function RegisterPage() {
   // Debounced version of checkUsername
   const debouncedCheckUsername = debounce(checkUsername, 500);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -113,7 +113,7 @@ export default function RegisterPage() {
       // Show verification message
       setVerificationSent(true);
 
-    } catch (error: any) {
+    } catch (error) {
       console.error('Registration error:', error);
       setError(error?.data?.message || error?.message || 'Failed to register. Please try again.');
     } finally {
@@ -250,81 +250,6 @@ export default function RegisterPage() {
                   Username must be at least 3 characters long
                 </p>
               </div>
-
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-foreground">
-                  Password
-                </label>
-                <div className="relative mt-1">
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    className="input-field pr-10"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="passwordConfirm" className="block text-sm font-medium text-foreground">
-                  Confirm Password
-                </label>
-                <div className="relative mt-1">
-                  <input
-                    id="passwordConfirm"
-                    name="passwordConfirm"
-                    type={showConfirmPassword ? "text" : "password"}
-                    autoComplete="new-password"
-                    required
-                    className="input-field pr-10"
-                    value={formData.passwordConfirm}
-                    onChange={(e) => setFormData({ ...formData, passwordConfirm: e.target.value })}
-                  />
-                  <button
-                    type="button"
-                    className="absolute inset-y-0 right-0 flex items-center pr-3"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeSlashIcon className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                    ) : (
-                      <EyeIcon className="h-5 w-5 text-muted-foreground hover:text-foreground" />
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading || usernameStatus === 'taken' || usernameStatus === 'checking'}
-              className="w-full bg-primary text-primary-foreground hover:opacity-90 py-2 px-4 rounded-md disabled:opacity-50 transition-opacity"
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm text-muted-foreground">
-                Already have an account?{' '}
-                <Link href="/login" className="text-primary hover:opacity-90 transition-opacity">
-                  Sign in
-                </Link>
-              </p>
             </div>
           </form>
         </div>

@@ -1,39 +1,28 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/context/AuthContext';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { useAuth } from '../../context/AuthContext';
+import { ThemeToggle } from '../../components/ThemeToggle';
 import { UserCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
 
-interface UserProfile {
-  avatar_url: string;
-  name: string;
-  phone: string;
-  bio: string;
-  no_ic: string;
+const initialProfile = {
+  avatar_url: '',
+  name: '',
+  phone: '',
+  bio: '',
+  no_ic: '',
   bank_details: {
-    bank_name: string;
-    account_number: string;
-    account_holder: string;
-  };
-}
+    bank_name: '',
+    account_number: '',
+    account_holder: '',
+  }
+};
 
 export default function ProfilePage() {
   const { user, pb } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  const [profile, setProfile] = useState<UserProfile>({
-    avatar_url: '',
-    name: '',
-    phone: '',
-    bio: '',
-    no_ic: '',
-    bank_details: {
-      bank_name: '',
-      account_number: '',
-      account_holder: '',
-    }
-  });
+  const [message, setMessage] = useState(null);
+  const [profile, setProfile] = useState(initialProfile);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -56,7 +45,7 @@ export default function ProfilePage() {
     loadProfile();
   }, [user, pb]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
@@ -71,9 +60,9 @@ export default function ProfilePage() {
         }
       });
 
-      await pb.collection('usersku').update(user!.id, formData);
+      await pb.collection('usersku').update(user.id, formData);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
-    } catch (error: any) {
+    } catch (error) {
       console.error('Update error:', error);
       setMessage({ type: 'error', text: error?.message || 'Failed to update profile' });
     } finally {
@@ -81,7 +70,7 @@ export default function ProfilePage() {
     }
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -89,10 +78,10 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const record = await pb.collection('usersku').update(user!.id, formData);
+      const record = await pb.collection('usersku').update(user.id, formData);
       setProfile(prev => ({ ...prev, avatar_url: record.avatar_url }));
       setMessage({ type: 'success', text: 'Profile picture updated!' });
-    } catch (error: any) {
+    } catch (error) {
       setMessage({ type: 'error', text: 'Failed to update profile picture' });
     }
   };

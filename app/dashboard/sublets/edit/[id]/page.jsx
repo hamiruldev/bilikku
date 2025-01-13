@@ -4,13 +4,7 @@ import { use } from "react";
 import { useRouter } from "next/navigation";
 import SubletFormPage from "../../[action]/page";
 
-interface EditSubletPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default function EditSubletPage({ params }: EditSubletPageProps) {
+export default function EditSubletPage({ params }) {
   const router = useRouter();
   const resolvedParams = use(params);
 

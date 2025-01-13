@@ -2,21 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
-
-interface DecodedToken {
-  email: string;
-  exp: number;
-  id: string;
-}
+import { useAuth } from '../../context/AuthContext';
 
 export default function VerifyPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { pb } = useAuth();
-  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [status, setStatus] = useState('verifying');
   const [error, setError] = useState('');
   const [userEmail, setUserEmail] = useState('');
 
@@ -34,13 +28,13 @@ export default function VerifyPage() {
       try {
         // Decode JWT to get email (just for display purposes)
         const [, payloadBase64] = token.split('.');
-        const decodedPayload = JSON.parse(atob(payloadBase64)) as DecodedToken;
+        const decodedPayload = JSON.parse(atob(payloadBase64));
         setUserEmail(decodedPayload.email);
 
         // Verify the email
         await pb.collection('usersku').confirmVerification(token);
         setStatus('success');
-      } catch (error: any) {
+      } catch (error) {
         console.error('Verification error:', error);
         setStatus('error');
         setError(error?.data?.message || error?.message || 'Failed to verify email');

@@ -1,9 +1,10 @@
 'use client';
 
-import { AuthProvider } from "@/context/AuthContext";
-import { ThemeProvider } from '@/components/ThemeProvider';
-import { Header } from '@/components/Header';
-import { LayoutContent } from '@/components/LayoutContent';
+import React from 'react';
+import { AuthProvider } from "../context/AuthContext";
+import { ThemeProvider } from './ThemeProvider';
+import { Header } from './Header';
+import { LayoutContent } from './LayoutContent';
 
 export function ClientProviders({ children }: { children: React.ReactNode }) {
   return (

@@ -1,15 +1,15 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
-import { Header } from '@/components/Header';
-import { Breadcrumb } from '@/components/Breadcrumb';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { Header } from '../components/Header';
+import { Breadcrumb } from '../components/Breadcrumb';
+import { LoadingSpinner } from '../components/LoadingSpinner';
 import { usePathname, useRouter } from 'next/navigation';
-import { PUBLIC_ROUTES } from '@/lib/constants';
+import { PUBLIC_ROUTES } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
-export function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+export function AuthenticatedLayout({ children }) {
   const { user, isLoading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();

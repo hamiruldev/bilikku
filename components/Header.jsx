@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 import { Sidebar } from './Sidebar';
 import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export function Header() {
@@ -24,7 +24,6 @@ export function Header() {
           </Link>
 
           <div className="flex items-center space-x-4">
-            {/* Add any header actions here */}
             <button
               onClick={() => setIsSidebarOpen(true)}
               className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
@@ -36,7 +35,6 @@ export function Header() {
         </div>
       </header>
 
-      {/* Sidebar with animation */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>

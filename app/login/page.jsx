@@ -1,18 +1,19 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { pb } from '@/lib/pocketbase';
+import { pb } from '../../lib/pocketbase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: searchParams.get('email') || '',
+    email: searchParams?.get('email') || '',
     password: '',
   });
   const [error, setError] = useState('');
@@ -20,12 +21,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get('verified') === 'true') {
+    if (searchParams?.get('verified') === 'true') {
       console.log('Email verified successfully!');
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -33,7 +34,7 @@ export default function LoginPage() {
     try {
       await login(formData.email, formData.password);
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error('Auth error:', error);
       setError(error?.data?.message || error?.message || 'Failed to login. Please try again.');
     } finally {
@@ -43,7 +44,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background relative px-4">
-      {/* Background gradient circles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />

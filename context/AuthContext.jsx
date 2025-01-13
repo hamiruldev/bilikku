@@ -1,34 +1,16 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { pb } from '@/lib/pocketbase';
-import { superuserClient, authenticateSuperuser } from '@/lib/superuserClient';
+import { pb } from '../lib/pocketbase';
+import { superuserClient, authenticateSuperuser } from '../lib/superuserClient';
 
-interface User {
-  id: string;
-  email: string;
-  role: string;
-  username: string;
-  isAdmin: boolean;
-  isSuperAdmin: boolean;
-  tenantId?: string;
-}
+const AuthContext = createContext();
 
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string, isSuperAdmin?: boolean) => Promise<void>;
-  logout: () => void;
-  isLoading: boolean;
-  pb: typeof pb;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const checkUserRole = async (userId: string) => {
+  const checkUserRole = async (userId) => {
     try {
       const user = await pb.collection('tenant_roles').getFirstListItem(`user="${userId}"`);
       const roleId = user.role;
@@ -54,11 +36,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const initializeAuth = async () => {
       try {
-        // Try to load the auth state from the cookie
-
-        console.log("pb.authStore---->", pb.authStore)
-
-
         if (pb.authStore.isValid) {
           const authModel = pb.authStore.model;
           if (authModel) {
@@ -116,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password: string, isSuperAdmin = false) => {
+  const login = async (email, password, isSuperAdmin = false) => {
     try {
       if (isSuperAdmin) {
         const isAuthenticated = await authenticateSuperuser(email, password);

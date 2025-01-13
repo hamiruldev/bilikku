@@ -1,8 +1,9 @@
 'use client';
 
-import { useAuth } from '@/context/AuthContext';
+import React from 'react';
+import { useAuth } from '../context/AuthContext';
 
-export function LayoutContent({ children }: { children: React.ReactNode }) {
+export function LayoutContent({ children }) {
   const { user } = useAuth();
 
   return (
