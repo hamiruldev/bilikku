@@ -85,8 +85,8 @@ export default function RoomsPage() {
   // Filter rooms based on search term and filters
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch =
-      room.number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      room.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room?.number?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      room?.type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (room.expand?.sublet_id?.name || "")
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
