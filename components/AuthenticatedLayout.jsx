@@ -23,7 +23,7 @@ export function AuthenticatedLayout({ children }) {
   // Handle authentication
   useEffect(() => {
     if (!isLoading && !user && !PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, isLoading, pathname, router]);
 

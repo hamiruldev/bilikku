@@ -177,6 +177,13 @@ export default function RegisterPage() {
       </div>
 
       <div className="w-full max-w-md">
+        {/* Logo and Login Link */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block mb-4">
+            <span className="text-3xl font-bold text-primary">BilikKu</span>
+          </Link>
+        </div>
+
         <div className="glass-panel space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold">Create Account</h1>
@@ -252,6 +259,14 @@ export default function RegisterPage() {
               </div>
             </div>
           </form>
+
+          {/* Login Link */}
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">Already have an account? </span>
+            <Link href="/login" className="text-primary hover:underline">
+              Login here
+            </Link>
+          </div>
         </div>
       </div>
     </div>

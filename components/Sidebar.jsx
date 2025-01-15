@@ -89,22 +89,33 @@ export function Sidebar({ isOpen, onClose }) {
               </>
             )}
 
-            <Link
-              href="/profile"
-              className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
-              onClick={onClose}
-            >
-              <CogIcon className="w-5 h-5" />
-              <span>Settings</span>
-            </Link>
+
           </nav>
         </div>
 
         <div className="p-4 border-t border-glass-border space-y-4">
+
+          <Link
+            href="/profile"
+            className="flex items-center justify-between space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+            onClick={onClose}
+          >
+
+            <div className="w-100 flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Settings</span>
+            </div>
+
+            <CogIcon className="w-5 h-5" />
+
+          </Link>
+
+
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Theme</span>
             <ThemeToggle />
           </div>
+
+
           <button
             onClick={handleLogout}
             className="flex items-center space-x-2 w-full p-2 text-destructive hover:bg-destructive/10 rounded-lg transition-colors"

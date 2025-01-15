@@ -8,6 +8,7 @@ import {
   CurrencyDollarIcon,
   ChartBarIcon,
   BellIcon,
+  BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 
@@ -177,6 +178,12 @@ export default function DashboardPage() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+
+              <QuickActionButton
+                icon={<BuildingOfficeIcon className="w-5 h-5" />}
+                label="Add Sublet"
+                onClick={() => router.push('/dashboard/sublets/new')}
+              />
               <QuickActionButton
                 icon={<HomeIcon className="w-5 h-5" />}
                 label="Add Room"
