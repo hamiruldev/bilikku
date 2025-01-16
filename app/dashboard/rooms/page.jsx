@@ -109,6 +109,8 @@ export default function RoomsPage() {
     );
   }
 
+  console.log("rooms-->", rooms);
+
   return (
     <div className="min-h-screen bg-background relative">
       {/* Background gradient circles */}
@@ -122,7 +124,7 @@ export default function RoomsPage() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Rooms</h1>
           <Link
-            href="/dashboard/rooms/form/new"
+            href="/dashboard/rooms/new"
             className="btn-primary inline-flex items-center"
           >
             <PlusIcon className="w-5 h-5 mr-2" />
@@ -216,7 +218,7 @@ export default function RoomsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Link
-                    href={`/dashboard/rooms/form/${room.id}`}
+                    href={`/dashboard/rooms/edit/${room.id}`}
                     className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
                   >
                     <PencilIcon className="w-5 h-5" />
@@ -256,7 +258,7 @@ export default function RoomsPage() {
                       Monthly Rental
                     </p>
                     <p className="font-medium">
-                      RM {room.rent_amount?.toFixed(2)}
+                      RM {room.price_per_month?.toFixed(2)}
                     </p>
                   </div>
                 </div>

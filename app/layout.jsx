@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthenticatedLayout } from '../components/AuthenticatedLayout';
 import { AuthProvider } from "../context/AuthContext";
+import { LanguageProvider } from '../context/LanguageContext';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,13 +19,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
-        <AuthProvider>
-          <ThemeProvider>
-            <AuthenticatedLayout>
-              {children}
-            </AuthenticatedLayout>
-          </ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <AuthProvider>
+            <LanguageProvider>
+              <AuthenticatedLayout>
+                {children}
+              </AuthenticatedLayout>
+            </LanguageProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

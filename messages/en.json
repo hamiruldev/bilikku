@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "notAvailable": "N/A",
+    "actions": "Actions",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "save": "Save",
+    "search": "Search",
+    "back": "Back"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "forgotPassword": "Forgot Password?",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username"
+  },
+  "tenants": {
+    "title": "Tenants",
+    "addNew": "Add New Tenant",
+    "searchPlaceholder": "Search tenants...",
+    "noTenants": "No tenants found",
+    "tenantNo": "Tenant No",
+    "name": "Name",
+    "room": "Room",
+    "leasePeriod": "Lease Period",
+    "deposit": {
+      "title": "Deposit",
+      "paid": "Paid",
+      "notPaid": "Not Paid"
+    },
+    "deleteConfirm": "Are you sure you want to delete this tenant?"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "stats": {
+      "totalRooms": "Total Rooms",
+      "occupiedRooms": "Occupied Rooms",
+      "availableRooms": "Available Rooms",
+      "totalTenants": "Total Tenants",
+      "pendingPayments": "Pending Payments",
+      "monthlyRevenue": "Monthly Revenue"
+    }
+  }
+} 

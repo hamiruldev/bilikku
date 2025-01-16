@@ -1,0 +1,51 @@
+{
+  "common": {
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "notAvailable": "Tiada",
+    "actions": "Tindakan",
+    "edit": "Sunting",
+    "delete": "Padam",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "search": "Cari",
+    "back": "Kembali"
+  },
+  "auth": {
+    "login": "Log Masuk",
+    "register": "Daftar",
+    "logout": "Log Keluar",
+    "forgotPassword": "Lupa Kata Laluan?",
+    "email": "Emel",
+    "password": "Kata Laluan",
+    "username": "Nama Pengguna"
+  },
+  "tenants": {
+    "title": "Penyewa",
+    "addNew": "Tambah Penyewa Baru",
+    "searchPlaceholder": "Cari penyewa...",
+    "noTenants": "Tiada penyewa dijumpai",
+    "tenantNo": "No. Penyewa",
+    "name": "Nama",
+    "room": "Bilik",
+    "leasePeriod": "Tempoh Sewaan",
+    "deposit": {
+      "title": "Deposit",
+      "paid": "Dibayar",
+      "notPaid": "Belum Dibayar"
+    },
+    "deleteConfirm": "Adakah anda pasti mahu memadam penyewa ini?"
+  },
+  "dashboard": {
+    "title": "Papan Pemuka",
+    "stats": {
+      "totalRooms": "Jumlah Bilik",
+      "occupiedRooms": "Bilik Berpenghuni",
+      "availableRooms": "Bilik Kosong",
+      "totalTenants": "Jumlah Penyewa",
+      "pendingPayments": "Pembayaran Tertunggak",
+      "monthlyRevenue": "Pendapatan Bulanan"
+    }
+  }
+} 

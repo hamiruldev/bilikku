@@ -34,7 +34,7 @@ const initialFormData = {
   type: '',
   floor: '',
   status: 'available',
-  rent_amount: 0,
+  price_per_month: 0,
   deposit_amount: 0,
   description: '',
   sublet_id: '',
@@ -67,6 +67,9 @@ export default function RoomForm({ action }) {
         sort: 'name',
         fields: 'id,name'
       });
+
+
+      console.log("records loadSublets-->", records);
       setSublets(records.items);
     } catch (err) {
       console.error('Error loading sublets:', err);
@@ -77,9 +80,10 @@ export default function RoomForm({ action }) {
   const loadRoom = async () => {
     try {
       const record = await pb.collection('bilikku_rooms').getOne(action);
+      console.log("record loadRoom-->", record);
       setFormData({
         ...record,
-        amenities: record.amenities || [],
+        amenities: JSON.parse(record.amenities) || [],
       });
     } catch (err) {
       console.error('Error loading room:', err);
@@ -130,6 +134,8 @@ export default function RoomForm({ action }) {
       setNewAmenity('');
     }
   };
+
+  console.log("formData-->", formData);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -304,11 +310,11 @@ export default function RoomForm({ action }) {
                     <input
                       type="number"
                       className="input-field"
-                      value={formData.rent_amount}
+                      value={formData.price_per_month}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          rent_amount: parseFloat(e.target.value)
+                          price_per_month: parseFloat(e.target.value)
                         })
                       }
                       required

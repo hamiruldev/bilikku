@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 import { ArrowRightIcon, HomeIcon, UsersIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { LanguageToggle } from '../components/LanguageToggle';
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
@@ -60,13 +61,14 @@ export default function HomePage() {
             <p className="max-w-[750px] text-lg text-muted-foreground sm:text-xl">
               The easiest way to manage your sublet properties. Track rooms, tenants, and payments all in one place.
             </p>
-            <div className="flex gap-4">
+            <div className="flex gap-4 items-center">
               <Link href="/register" className="btn-primary">
                 Start Free Trial
               </Link>
               <Link href="/login" className="btn-secondary">
                 View Demo <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
+              <LanguageToggle />
             </div>
           </div>
         </section>
