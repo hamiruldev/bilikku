@@ -47,6 +47,18 @@
     --input: 240 3.7% 15.9%;
     --ring: 211 100% 50%;
   }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    @apply text-base;
+    -webkit-text-size-adjust: 100%;
+  }
 }
 
 @layer base {
