@@ -1,273 +1,398 @@
 'use client';
 
-import Link from 'next/link';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import debounce from 'lodash.debounce';
 
 export default function RegisterPage() {
+  const { register, validateUsername, validateEmail } = useAuth();
+  const { t } = useLanguage();
   const router = useRouter();
-  const { pb } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
-    username: '',
     password: '',
     passwordConfirm: '',
+    name: '',
+    username: ''
   });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [verificationSent, setVerificationSent] = useState(false);
-  const [usernameStatus, setUsernameStatus] = useState('idle');
 
-  // Debounce function to prevent too many API calls
-  const debounce = (func, wait) => {
-    let timeout;
-    return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => func(...args), wait);
-    };
-  };
+  // Validation states
+  const [validationErrors, setValidationErrors] = useState({
+    username: '',
+    email: '',
+    password: '',
+    passwordConfirm: ''
+  });
 
-  // Check username availability
-  const checkUsername = async (username) => {
-    if (!username || username.length < 3) return;
-    
-    setUsernameStatus('checking');
-    try {
-      const result = await pb.collection('usersku').getList(1, 1, {
-        filter: `username = "${username}"`
-      });
-      
-      setUsernameStatus(result.totalItems === 0 ? 'available' : 'taken');
-    } catch (error) {
-      console.error('Error checking username:', error);
-      setUsernameStatus('idle');
+  // Add these new states at the top of your component
+  const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
+  const [isEmailAvailable, setIsEmailAvailable] = useState(false);
+
+  // Debounced validation functions
+  const debouncedUsernameCheck = useCallback(
+    debounce(async (username) => {
+      if (username.length < 3) {
+        setIsUsernameAvailable(false);
+        return;
+      }
+
+      setIsCheckingUsername(true);
+      try {
+        const isAvailable = await validateUsername(username);
+        setIsUsernameAvailable(isAvailable);
+        setValidationErrors(prev => ({
+          ...prev,
+          username: isAvailable ? '' : t('auth.errors.usernameExists')
+        }));
+      } catch (error) {
+        console.error('Username validation error:', error);
+        setIsUsernameAvailable(false);
+      } finally {
+        setIsCheckingUsername(false);
+      }
+    }, 500),
+    []
+  );
+
+  const debouncedEmailCheck = useCallback(
+    debounce(async (email) => {
+      if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        setIsEmailAvailable(false);
+        return;
+      }
+
+      setIsCheckingEmail(true);
+      try {
+        const isAvailable = await validateEmail(email);
+        setIsEmailAvailable(isAvailable);
+        setValidationErrors(prev => ({
+          ...prev,
+          email: isAvailable ? '' : t('auth.errors.emailExists')
+        }));
+      } catch (error) {
+        console.error('Email validation error:', error);
+        setIsEmailAvailable(false);
+      } finally {
+        setIsCheckingEmail(false);
+      }
+    }, 500),
+    []
+  );
+
+  const validateForm = () => {
+    const errors = {};
+
+    // Username validation
+    if (formData.username.length < 3) {
+      errors.username = t('auth.errors.usernameTooShort');
     }
-  };
+    if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      errors.username = t('auth.errors.usernameInvalid');
+    }
 
-  // Debounced version of checkUsername
-  const debouncedCheckUsername = debounce(checkUsername, 500);
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.email = t('auth.errors.emailInvalid');
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      errors.password = t('auth.errors.passwordTooShort');
+    }
+    if (!/[A-Z]/.test(formData.password)) {
+      errors.password = t('auth.errors.passwordNoUppercase');
+    }
+    if (!/[a-z]/.test(formData.password)) {
+      errors.password = t('auth.errors.passwordNoLowercase');
+    }
+    if (!/[0-9]/.test(formData.password)) {
+      errors.password = t('auth.errors.passwordNoNumber');
+    }
+
+    // Password confirmation validation
+    if (formData.password !== formData.passwordConfirm) {
+      errors.passwordConfirm = t('auth.errors.passwordMismatch');
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
+
+    // Validate form before submission
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      if (formData.password !== formData.passwordConfirm) {
-        throw new Error('Passwords do not match');
-      }
-
-      // Check username availability one final time before submission
-      const usernameCheck = await pb.collection('usersku').getList(1, 1, {
-        filter: `username = "${formData.username}"`
-      });
-
-      if (usernameCheck.totalItems > 0) {
-        throw new Error('Username is already taken');
-      }
-
-      // Create user account with all fields
-      const userData = {
-        email: formData.email,
-        username: formData.username,
-        password: formData.password,
-        passwordConfirm: formData.passwordConfirm,
-        emailVisibility: true,
-        // Optional fields with empty/null values
-        kodku: "",
-        no_ic: "",
-        ic_img_url: "",
-        phone: "",
-        bio: "",
-        avatar_url: "",
-        bank_details: JSON.stringify({
-          bank_name: "",
-          account_number: "",
-          account_holder: ""
-        }),
-        referal_code: ""
-      };
-
-      // Create user with all fields
-      const user = await pb.collection('usersku').create(userData);
-
-      // Assign default tenant role - assign user as guess
-      await pb.collection('tenant_roles').create({
-        user: user.id,
-        role: '2h1xh7gfv2pmt42', // ID of tenant role in roles collection
-        tenant: 'rb0s8fazmuf44ac', // ID of tenant role in roles collection
-        created_at: new Date(),
-      });
-
-      // Send verification email
-      await pb.collection('usersku').requestVerification(formData.email, {
-        emailTemplate: {
-          actionUrl: 'http://localhost:3000/verification/{token}'
-        }
-      });
-      
-      // Show verification message
-      setVerificationSent(true);
-
-    } catch (error) {
-      console.error('Registration error:', error);
-      setError(error?.data?.message || error?.message || 'Failed to register. Please try again.');
+      await register(formData.email, formData.password, formData.name, formData.username);
+      router.push('/dashboard');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.message || t('auth.registerError'));
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  if (verificationSent) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="max-w-md w-full space-y-8 p-6 bg-background border rounded-lg shadow-sm">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-foreground">
-              Check Your Email
-            </h2>
-            <div className="mt-4 text-muted-foreground">
-              <p>We've sent a verification email to:</p>
-              <p className="font-medium text-foreground mt-2">{formData.email}</p>
-              <p className="mt-4">
-                Please check your email and click the verification link to activate your account.
-              </p>
-            </div>
-            <div className="mt-8 space-y-4">
-              <button
-                onClick={() => window.location.href = '/login'}
-                className="w-full bg-primary text-primary-foreground hover:opacity-90 py-2 px-4 rounded-md transition-opacity"
-              >
-                Go to Login
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    setLoading(true);
-                    await pb.collection('usersku').requestVerification(formData.email);
-                    alert('Verification email resent!');
-                  } catch (error) {
-                    console.error('Error resending verification:', error);
-                    alert('Failed to resend verification email. Please try again.');
-                  } finally {
-                    setLoading(false);
-                  }
-                }}
-                disabled={loading}
-                className="w-full bg-secondary text-secondary-foreground hover:opacity-90 py-2 px-4 rounded-md disabled:opacity-50 transition-opacity"
-              >
-                {loading ? 'Sending...' : 'Resend Verification Email'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
 
+    // Clear validation error when user starts typing
+    setValidationErrors(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+
+    // Trigger real-time validation for username and email
+    if (name === 'username' && value.length >= 3) {
+      debouncedUsernameCheck(value);
+    }
+    if (name === 'email' && value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      debouncedEmailCheck(value);
+    }
+  };
+
+  // Clean up debounced functions
+  useEffect(() => {
+    return () => {
+      debouncedUsernameCheck.cancel();
+      debouncedEmailCheck.cancel();
+    };
+  }, []);
+
+  console.log("isUsernameAvailable-->", isUsernameAvailable);
+  console.log("isEmailAvailable-->", isEmailAvailable);
+  console.log("isCheckingEmail-->", isCheckingEmail);
+  console.log("isCheckingUsername-->", isCheckingUsername);
+  console.log("validationErrors-->", validationErrors);
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background relative px-4">
-      {/* Background gradient circles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
-      </div>
-
-      <div className="w-full max-w-md">
-        {/* Logo and Login Link */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block mb-4">
-            <span className="text-3xl font-bold text-primary">BilikKu</span>
-          </Link>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold">{t('auth.register')}</h2>
+          <p className="mt-2 text-muted-foreground">
+            {t('auth.registerSubtitle')}
+          </p>
         </div>
 
-        <div className="glass-panel space-y-6">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold">Create Account</h1>
-            <p className="text-muted-foreground mt-2">Sign up for a new account</p>
+        {error && (
+          <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
+            {error}
           </div>
+        )}
 
-          {error && (
-            <div className="p-4 rounded-lg bg-destructive/10 text-destructive text-center">
-              {error}
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+          <div className="space-y-4">
+            {/* Username field */}
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium mb-2">
+                {t('auth.username')}
+              </label>
+              <div className="relative">
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  required
+                  className={`input-field ${validationErrors.username
+                      ? 'border-destructive'
+                      : isUsernameAvailable && formData.username.length >= 3
+                        ? 'border-green-500'
+                        : ''
+                    }`}
+                  placeholder={t('auth.usernamePlaceholder')}
+                  value={formData.username}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                {isCheckingUsername ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : isUsernameAvailable && formData.username.length >= 3 ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                    ✓
+                  </div>
+                ) : null}
+              </div>
+              {validationErrors.username ? (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationErrors.username}
+                </p>
+              ) : isUsernameAvailable && formData.username.length >= 3 ? (
+                <p className="mt-1 text-sm text-green-500">
+                  {t('auth.usernameAvailable')}
+                </p>
+              ) : null}
             </div>
-          )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-foreground">
-                  Email address
-                </label>
+            {/* Name field */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium mb-2">
+                {t('auth.name')}
+              </label>
+              <input
+                id="name"
+                name="name"
+                type="text"
+                required
+                className="input-field"
+                placeholder={t('auth.namePlaceholder')}
+                value={formData.name}
+                onChange={handleChange}
+                disabled={isLoading}
+              />
+            </div>
+
+            {/* Email field */}
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium mb-2">
+                {t('auth.email')}
+              </label>
+              <div className="relative">
                 <input
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
                   required
-                  className="input-field mt-1"
+                  className={`input-field ${validationErrors.email
+                      ? 'border-destructive'
+                      : isEmailAvailable && formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+                        ? 'border-green-500'
+                        : ''
+                    }`}
+                  placeholder={t('auth.emailPlaceholder')}
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                {isCheckingEmail ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : isEmailAvailable && formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                    ✓
+                  </div>
+                ) : null}
+              </div>
+              {validationErrors.email ? (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationErrors.email}
+                </p>
+              ) : isEmailAvailable && formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/) ? (
+                <p className="mt-1 text-sm text-green-500">
+                  {t('auth.emailAvailable')}
+                </p>
+              ) : null}
+            </div>
+
+            {/* Password field */}
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium mb-2">
+                {t('auth.password')}
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className={`input-field pr-10 ${validationErrors.password ? 'border-destructive' : ''}`}
+                  placeholder={t('auth.passwordPlaceholder')}
+                  value={formData.password}
+                  onChange={handleChange}
+                  disabled={isLoading}
+                />
+                <button
+                  type="button"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeSlashIcon className="w-5 h-5 text-muted-foreground" />
+                  ) : (
+                    <EyeIcon className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+              {validationErrors.password && (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationErrors.password}
+                </p>
+              )}
+            </div>
+
+            {/* Confirm Password field */}
+            <div>
+              <label htmlFor="passwordConfirm" className="block text-sm font-medium mb-2">
+                {t('auth.confirmPassword')}
+              </label>
+              <div className="relative">
+                <input
+                  id="passwordConfirm"
+                  name="passwordConfirm"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  className={`input-field pr-10 ${validationErrors.passwordConfirm ? 'border-destructive' : ''}`}
+                  placeholder={t('auth.confirmPasswordPlaceholder')}
+                  value={formData.passwordConfirm}
+                  onChange={handleChange}
+                  disabled={isLoading}
                 />
               </div>
-
-              <div>
-                <label htmlFor="username" className="block text-sm font-medium text-foreground">
-                  Username
-                </label>
-                <div className="relative mt-1">
-                  <input
-                    id="username"
-                    name="username"
-                    type="text"
-                    autoComplete="username"
-                    required
-                    minLength={3}
-                    className={`input-field mt-1 ${
-                      usernameStatus === 'taken' ? 'border-destructive' : 
-                      usernameStatus === 'available' ? 'border-green-500' : ''
-                    }`}
-                    value={formData.username}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setFormData({ ...formData, username: value });
-                      if (value.length >= 3) {
-                        debouncedCheckUsername(value);
-                      } else {
-                        setUsernameStatus('idle');
-                      }
-                    }}
-                  />
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 text-sm">
-                    {usernameStatus === 'checking' && (
-                      <span className="text-muted-foreground">Checking...</span>
-                    )}
-                    {usernameStatus === 'taken' && (
-                      <span className="text-destructive">Username taken</span>
-                    )}
-                    {usernameStatus === 'available' && (
-                      <span className="text-green-500">Available</span>
-                    )}
-                  </div>
-                </div>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Username must be at least 3 characters long
+              {validationErrors.passwordConfirm && (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationErrors.passwordConfirm}
                 </p>
-              </div>
+              )}
             </div>
-          </form>
-
-          {/* Login Link */}
-          <div className="text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
-            <Link href="/login" className="text-primary hover:underline">
-              Login here
-            </Link>
           </div>
-        </div>
+
+          <button
+            type="submit"
+            className="btn-primary w-full"
+            disabled={
+              isLoading ||
+              !isUsernameAvailable ||
+              !isEmailAvailable ||
+              isCheckingUsername ||
+              isCheckingEmail ||
+              !formData.password ||
+              formData.password !== formData.passwordConfirm ||
+              Object.keys(validationErrors).length > 0
+            }
+          >
+            {isLoading ? t('common.loading') : t('auth.register')}
+          </button>
+
+          <p className="text-center text-sm">
+            {t('auth.alreadyHaveAccount')}{' '}
+            <Link href="/login" className="text-primary hover:underline">
+              {t('auth.login')}
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );

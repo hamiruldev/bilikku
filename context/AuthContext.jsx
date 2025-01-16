@@ -3,12 +3,21 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { pb } from '../lib/pocketbase';
 import { superuserClient, authenticateSuperuser } from '../lib/superuserClient';
+import { useRouter } from 'next/navigation';
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+  user: null,
+  pb: null,
+  login: async () => { },
+  logout: async () => { },
+  register: async () => { },
+  isLoading: true
+});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   const checkUserRole = async (userId) => {
     try {
@@ -114,10 +123,10 @@ export const AuthProvider = ({ children }) => {
       }
 
       const authData = await pb.collection('usersku').authWithPassword(email, password);
-      
+
       if (authData.record) {
         const { role, tenantId } = await checkUserRole(authData.record.id);
-        
+
         setUser({
           id: authData.record.id,
           email: authData.record.email,
@@ -142,8 +151,77 @@ export const AuthProvider = ({ children }) => {
     document.cookie = 'pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
   };
 
+  const register = async (email, password, name, username) => {
+    try {
+      const data = {
+        email,
+        password,
+        passwordConfirm: password,
+        full_name: name,
+        username: username
+      };
+
+      const createdUser = await pb.collection('usersku').create(data);
+
+      // After registration, automatically log them in
+      const authData = await pb.collection('usersku').authWithPassword(
+        email,
+        password
+      );
+
+      setUser(authData.record);
+      return authData;
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
+    }
+  };
+
+  const validateUsername = async (username) => {
+    try {
+      await pb.collection('usersku').getFirstListItem(`username="${username}"`);
+      // If we get here, username exists
+      return false;
+    } catch (error) {
+      if (error.status === 404) {
+        // Username is available
+        return true;
+      }
+      // Other errors
+      console.error('Username validation error:', error);
+      throw error;
+    }
+  };
+
+  const validateEmail = async (email) => {
+    try {
+      await pb.collection('usersku').getFirstListItem(`email="${email}"`);
+      // If we get here, email exists
+      return false;
+    } catch (error) {
+      if (error.status === 404) {
+        // Email is available
+        return true;
+      }
+      // Other errors
+      console.error('Email validation error:', error);
+      throw error;
+    }
+  };
+
+  const value = {
+    user,
+    pb,
+    login,
+    logout,
+    register,
+    validateUsername,
+    validateEmail,
+    isLoading
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading, pb }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
