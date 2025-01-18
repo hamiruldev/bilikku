@@ -5,7 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { UserCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { userAPI } from '../../services/api';
-import { getUsername } from '../../lib/helpers';
 
 const initialProfile = {
   avatar_url: '',
@@ -31,16 +30,12 @@ export default function ProfilePage() {
       if (!user?.id) return;
       try {
         const record = await userAPI.getProfile(user.id);
-        const referal_name = await getUsername(pb, record.referal_code)
+        const referal_name = await userAPI.getUsername(pb, record.referal_code)
 
         setProfile({
           ...record,
           referal_name,
-          bank_details: record.bank_details ? JSON.parse(record.bank_details) : {
-            bank_name: '',
-            account_number: '',
-            account_holder: '',
-          }
+          bank_details: record.bank_details
         });
       } catch (error) {
         console.error('Error loading profile:', error);

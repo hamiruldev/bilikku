@@ -1,0 +1,141 @@
+{
+    "common": {
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "notAvailable": "N/A",
+        "actions": "Actions",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save",
+        "search": "Search",
+        "back": "Back"
+    },
+    "auth": {
+        "login": "Login",
+        "register": "Register",
+        "logout": "Logout",
+        "forgotPassword": "Forgot Password?",
+        "email": "Email",
+        "password": "Password",
+        "username": "Username",
+        "registerSubtitle": "Create your account",
+        "name": "Full Name",
+        "referralCode": "Referral Code",
+        "namePlaceholder": "Enter your full name",
+        "emailPlaceholder": "Enter your email",
+        "passwordPlaceholder": "Enter your password",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Confirm your password",
+        "passwordMismatch": "Passwords do not match",
+        "registerError": "Registration failed. Please try again.",
+        "alreadyHaveAccount": "Already have an account?",
+        "usernamePlaceholder": "Enter your username",
+        "usernameAvailable": "Username is available",
+        "emailAvailable": "Email is available",
+        "referralCodeValid": "KodKu is available",
+        "referralCodePlaceholder": "Enter KodKu",
+        "errors": {
+            "usernameTooShort": "Username must be at least 3 characters long",
+            "usernameInvalid": "Username can only contain letters, numbers, and underscores",
+            "emailInvalid": "Please enter a valid email address",
+            "passwordTooShort": "Password must be at least 8 characters long",
+            "passwordNoUppercase": "Password must contain at least one uppercase letter",
+            "passwordNoLowercase": "Password must contain at least one lowercase letter",
+            "passwordNoNumber": "Password must contain at least one number",
+            "passwordMismatch": "Passwords do not match",
+            "usernameExists": "This username is already taken",
+            "emailExists": "This email is already registered",
+            "referralCodeInvalid": "KodKu is invalid",
+            "referralCodeRequired": "KodKu is required"
+        }
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "stats": {
+            "totalRooms": "Total Rooms",
+            "occupiedRooms": "Occupied Rooms",
+            "availableRooms": "Available Rooms",
+            "totalTenants": "Total Tenants",
+            "pendingPayments": "Pending Payments",
+            "monthlyRevenue": "Monthly Revenue"
+        }
+    },
+    "tenants": {
+        "title": "Tenants",
+        "addNew": "Add New Tenant",
+        "searchPlaceholder": "Search tenants...",
+        "noTenants": "No tenants found",
+        "tenantNo": "Tenant No",
+        "name": "Name",
+        "room": "Room",
+        "leasePeriod": "Lease Period",
+        "deposit": {
+            "title": "Deposit",
+            "paid": "Paid",
+            "notPaid": "Not Paid"
+        },
+        "deleteConfirm": "Are you sure you want to delete this tenant?"
+    },
+    "hero": {
+        "title": "Sublet Management Made Simple",
+        "subtitle": "The easiest way to manage your sublet properties. Track rooms, tenants, and payments all in one place.",
+        "startTrial": "Start Free Trial",
+        "viewDemo": "View Demo"
+    },
+    "features": {
+        "title": "Everything you need to manage your sublets",
+        "roomManagement": {
+            "title": "Room Management",
+            "description": "Manage multiple rooms with detailed tracking of availability and tenant assignments."
+        },
+        "tenantManagement": {
+            "title": "Tenant Management",
+            "description": "Keep track of tenant information, agreements, and payment history in one place."
+        },
+        "paymentTracking": {
+            "title": "Payment Tracking",
+            "description": "Track rental payments and deposits with automated status updates."
+        }
+    },
+    "appeal": {
+        "title": "Transform Your Property Management Experience",
+        "subtitle": "Join hundreds of property managers who have simplified their lives with BilikKu",
+        "callToAction": "Get Started",
+        "joinCommunity": "Join Community",
+        "timeSaving": {
+            "title": "Save 10+ Hours Weekly",
+            "description": "Stop juggling spreadsheets and paperwork. Our automated system handles the tedious tasks, giving you back precious time to focus on what matters most."
+        },
+        "stressReduction": {
+            "title": "Reduce Management Stress",
+            "description": "Never miss a payment or forget a tenant request again. Our organized system keeps everything in check, bringing peace of mind to your property management."
+        },
+        "financialControl": {
+            "title": "Better Financial Control",
+            "description": "Track every payment, deposit, and expense in real-time. Make informed decisions with clear financial insights at your fingertips."
+        },
+        "growth": {
+            "title": "Scale Your Business",
+            "description": "Whether you manage 5 or 500 rooms, BilikKu grows with you. Our platform makes it easy to expand your property portfolio without the added stress."
+        }
+    },
+    "pricing": {
+        "title": "Simple, transparent pricing",
+        "freeTrial": "Free Trial",
+        "price": "RM 0",
+        "trialDescription": "Try BilikKu free for 14 days. No credit card required.",
+        "includes": "What's included",
+        "features": [
+            "Unlimited rooms",
+            "Tenant management",
+            "Payment tracking"
+        ],
+        "getStarted": "Get Started"
+    },
+    "nav": {
+        "login": "Login",
+        "getStarted": "Get Started"
+    }
+}

@@ -26,8 +26,14 @@ export const AuthProvider = ({ children }) => {
 
     const initializeAuth = async () => {
       try {
+
         const currentUser = await authAPI.getCurrentUser();
         setUser(currentUser);
+
+        if (window.location.pathname == '/login') {
+          router.push('/dashboard/');
+        }
+
       } catch (error) {
         console.error('Auth initialization error:', error);
         setUser(null);
@@ -45,7 +51,6 @@ export const AuthProvider = ({ children }) => {
       initializeAuth();
     });
 
-    // Initial auth check
     initializeAuth();
 
     // Cleanup

@@ -3,23 +3,14 @@
 import { useLanguage } from '../context/LanguageContext';
 
 export function LanguageToggle() {
-  const { locale, changeLanguage } = useLanguage();
+    const { language, toggleLanguage } = useLanguage();
 
-  const toggleLanguage = () => {
-    changeLanguage(locale === 'en' ? 'ms' : 'en');
-  };
-
-  return (
-    <button
-      onClick={toggleLanguage}
-      className="btn-secondary inline-flex items-center gap-2 px-4"
-      title={locale === 'en' ? 'Switch to Bahasa Melayu' : 'Switch to English'}
-    >
-      {locale === 'en' ? (
-        <span className="text-lg">🇲🇾</span>
-      ) : (
-        <span className="text-lg">🇬🇧</span>
-      )}
-    </button>
-  );
+    return (
+        <button
+            onClick={toggleLanguage}
+            className="px-3 py-1 rounded-md bg-primary/10 hover:bg-primary/20 text-primary"
+        >
+            {language === 'en' ? 'ms' : 'en'}
+        </button>
+    );
 } 

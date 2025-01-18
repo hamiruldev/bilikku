@@ -1,0 +1,141 @@
+{
+    "common": {
+        "loading": "Memuatkan...",
+        "error": "Ralat",
+        "success": "Berjaya",
+        "notAvailable": "Tiada",
+        "actions": "Tindakan",
+        "edit": "Sunting",
+        "delete": "Padam",
+        "cancel": "Batal",
+        "save": "Simpan",
+        "search": "Cari",
+        "back": "Kembali"
+    },
+    "auth": {
+        "login": "Log Masuk",
+        "register": "Daftar",
+        "logout": "Log Keluar",
+        "forgotPassword": "Lupa Kata Laluan?",
+        "email": "Emel",
+        "password": "Kata Laluan",
+        "username": "Nama Pengguna",
+        "registerSubtitle": "Cipta akaun anda",
+        "name": "Nama Penuh",
+        "referralCode": "Referral Code",
+        "namePlaceholder": "Masukkan nama penuh anda",
+        "emailPlaceholder": "Masukkan emel anda",
+        "passwordPlaceholder": "Masukkan kata laluan",
+        "confirmPassword": "Sahkan Kata Laluan",
+        "confirmPasswordPlaceholder": "Sahkan kata laluan anda",
+        "passwordMismatch": "Kata laluan tidak sepadan",
+        "registerError": "Pendaftaran gagal. Sila cuba lagi.",
+        "alreadyHaveAccount": "Sudah mempunyai akaun?",
+        "usernamePlaceholder": "Enter your username",
+        "usernameAvailable": "Username is available",
+        "emailAvailable": "Email is available",
+        "referralCodeValid": "KodKu is available",
+        "referralCodePlaceholder": "KodKu",
+        "errors": {
+            "usernameTooShort": "Nama pengguna mestilah sekurang-kurangnya 3 aksara",
+            "usernameInvalid": "Nama pengguna hanya boleh mengandungi huruf, nombor, dan garis bawah",
+            "emailInvalid": "Sila masukkan alamat emel yang sah",
+            "passwordTooShort": "Kata laluan mestilah sekurang-kurangnya 8 aksara",
+            "passwordNoUppercase": "Kata laluan mesti mengandungi sekurang-kurangnya satu huruf besar",
+            "passwordNoLowercase": "Kata laluan mesti mengandungi sekurang-kurangnya satu huruf kecil",
+            "passwordNoNumber": "Kata laluan mesti mengandungi sekurang-kurangnya satu nombor",
+            "passwordMismatch": "Kata laluan tidak sepadan",
+            "usernameExists": "Nama pengguna ini telah digunakan",
+            "emailExists": "Emel ini telah didaftarkan",
+            "referralCodeInvalid": "KodKu is Invalid",
+            "referralCodeRequired": "KodKu is required"
+        }
+    },
+    "dashboard": {
+        "title": "Papan Pemuka",
+        "stats": {
+            "totalRooms": "Jumlah Bilik",
+            "occupiedRooms": "Bilik Berpenghuni",
+            "availableRooms": "Bilik Kosong",
+            "totalTenants": "Jumlah Penyewa",
+            "pendingPayments": "Pembayaran Tertunggak",
+            "monthlyRevenue": "Pendapatan Bulanan"
+        }
+    },
+    "tenants": {
+        "title": "Penyewa",
+        "addNew": "Tambah Penyewa Baru",
+        "searchPlaceholder": "Cari penyewa...",
+        "noTenants": "Tiada penyewa dijumpai",
+        "tenantNo": "No. Penyewa",
+        "name": "Nama",
+        "room": "Bilik",
+        "leasePeriod": "Tempoh Sewaan",
+        "deposit": {
+            "title": "Deposit",
+            "paid": "Dibayar",
+            "notPaid": "Belum Dibayar"
+        },
+        "deleteConfirm": "Adakah anda pasti mahu memadam penyewa ini?"
+    },
+    "hero": {
+        "title": "Urus Sewa Mudah Automatik",
+        "subtitle": "Cara termudah untuk menguruskan hartanah sewa anda. Jejaki bilik, penyewa, dan pembayaran dalam satu tempat.",
+        "startTrial": "Mula Percubaan Percuma",
+        "viewDemo": "Lihat Demo"
+    },
+    "features": {
+        "title": "Semua yang anda perlukan untuk menguruskan sewaan",
+        "roomManagement": {
+            "title": "Pengurusan Bilik",
+            "description": "Urus pelbagai bilik dengan penjejakan terperinci ketersediaan dan tugasan penyewa."
+        },
+        "tenantManagement": {
+            "title": "Pengurusan Penyewa",
+            "description": "Jejaki maklumat penyewa, perjanjian, dan sejarah pembayaran dalam satu tempat."
+        },
+        "paymentTracking": {
+            "title": "Penjejakan Pembayaran",
+            "description": "Jejaki pembayaran sewa dan deposit dengan kemaskini status automatik."
+        }
+    },
+    "appeal": {
+        "title": "Transformasi Pengalaman Pengurusan Hartanah Anda",
+        "subtitle": "Sertai ratusan pengurus hartanah yang telah memudahkan kehidupan mereka dengan BilikKu",
+        "callToAction": "Mula Sekarang",
+        "joinCommunity": "Sertai Kommunity",
+        "timeSaving": {
+            "title": "Jimat 10+ Jam Seminggu",
+            "description": "Berhenti bergelut dengan spreadsheet dan kertas kerja. Sistem automatik kami mengendalikan tugas-tugas membosankan."
+        },
+        "stressReduction": {
+            "title": "Kurangkan Tekanan Pengurusan",
+            "description": "Tidak akan terlepas pembayaran atau permintaan penyewa lagi. Sistem kami yang teratur memastikan semuanya terkawal."
+        },
+        "financialControl": {
+            "title": "Kawalan Kewangan Lebih Baik",
+            "description": "Jejaki setiap pembayaran, deposit, dan perbelanjaan dalam masa nyata. Buat keputusan dengan wawasan kewangan yang jelas."
+        },
+        "growth": {
+            "title": "Kembangkan Perniagaan Anda",
+            "description": "Sama ada anda menguruskan 5 atau 500 bilik, BilikKu berkembang bersama anda."
+        }
+    },
+    "pricing": {
+        "title": "Harga yang mudah dan telus",
+        "freeTrial": "Percubaan Percuma",
+        "price": "RM 0",
+        "trialDescription": "Cuba BilikKu percuma selama 14 hari. Tiada kad kredit diperlukan.",
+        "includes": "Termasuk",
+        "features": [
+            "Bilik tanpa had",
+            "Pengurusan penyewa",
+            "Penjejakan pembayaran"
+        ],
+        "getStarted": "Mula Sekarang"
+    },
+    "nav": {
+        "login": "Log Masuk",
+        "getStarted": "Mula Sekarang"
+    }
+}

@@ -1,5 +1,6 @@
 // Import PocketBase instance
 import { pb } from "../lib/pocketbase";
+import { superuserClient } from "../lib/superuserClient";
 
 // User related API calls
 export const userAPI = {
@@ -52,6 +53,64 @@ export const userAPI = {
       sort: "username",
       ...options,
     });
+  },
+
+  validateReferralCode: async (code) => {
+    try {
+      const record = await pb
+        .collection("usersku")
+        .getFirstListItem(`kodku="${code}"`);
+
+      console.log("record--->", record);
+
+      return !!record; // Returns true if the record exists
+    } catch (error) {
+      if (error.status === 404) {
+        return false; // Referral code doesn't exist
+      }
+      throw error;
+    }
+  },
+
+  getUserDetailsBykodku: async (code) => {
+    try {
+      const record = await pb
+        .collection("usersku")
+        .getFirstListItem(`kodku="${code}"`);
+      return record;
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return null;
+    }
+  },
+
+  getUserDetails: async (pb, userId) => {
+    try {
+      if (!userId) return null;
+
+      const record = await pb.collection("usersku").getOne(userId, {
+        fields: "id,username,name,email,avatar_url",
+      });
+
+      return record;
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      return null;
+    }
+  },
+
+  getUsername: async (pb, userId) => {
+    try {
+      if (!userId) return null;
+
+      const record = await pb.collection("usersku").getOne(userId);
+
+      // Return name if available, otherwise username
+      return record.name || record.username || null;
+    } catch (error) {
+      console.error("Error fetching username:", error);
+      return null;
+    }
   },
 };
 
@@ -382,19 +441,6 @@ export const authAPI = {
         isAdmin: role === "admin",
         isSuperAdmin: false,
         tenantId: tenantId,
-      };
-    }
-
-    if (superuserClient.authStore.isValid && superuserClient.authStore.model) {
-      const superAuthModel = superuserClient.authStore.model;
-      return {
-        id: superAuthModel.id,
-        email: superAuthModel.email,
-        role: "superadmin",
-        username: superAuthModel.email.split("@")[0],
-        isAdmin: true,
-        isSuperAdmin: true,
-        tenantId: "rb0s8fazmuf44ac",
       };
     }
 

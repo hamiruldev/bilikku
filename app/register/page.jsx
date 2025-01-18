@@ -1,25 +1,34 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import debounce from 'lodash.debounce';
 import { userAPI } from '../../services/api';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Get kodku from URL parameters
+  const kodku = searchParams.get('kodku');
+  const is_tenant = searchParams.get('is_tenant');
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const { t, locale } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
   const [formData, setFormData] = useState({
+    //name: '',
     email: '',
     password: '',
     passwordConfirm: '',
-    name: '',
-    username: ''
+    username: '',
+    referal_code: kodku || ''
   });
 
   // Validation states
@@ -27,12 +36,15 @@ export default function RegisterPage() {
     username: '',
     email: '',
     password: '',
-    passwordConfirm: ''
+    passwordConfirm: '',
+    referal_code: ''
   });
 
   // Add these new states at the top of your component
   const [isUsernameAvailable, setIsUsernameAvailable] = useState(false);
   const [isEmailAvailable, setIsEmailAvailable] = useState(false);
+  const [isCheckingReferral, setIsCheckingReferral] = useState(false);
+  const [isReferralValid, setIsReferralValid] = useState(false);
 
   // Debounced validation functions
   const debouncedUsernameCheck = useCallback(
@@ -44,7 +56,7 @@ export default function RegisterPage() {
 
       setIsCheckingUsername(true);
       try {
-        const isAvailable = await validateUsername(username);
+        const isAvailable = await userAPI.validateUsername(username);
         setIsUsernameAvailable(isAvailable);
         setValidationErrors(prev => ({
           ...prev,
@@ -69,7 +81,7 @@ export default function RegisterPage() {
 
       setIsCheckingEmail(true);
       try {
-        const isAvailable = await validateEmail(email);
+        const isAvailable = await userAPI.validateEmail(email);
         setIsEmailAvailable(isAvailable);
         setValidationErrors(prev => ({
           ...prev,
@@ -83,6 +95,34 @@ export default function RegisterPage() {
       }
     }, 500),
     []
+  );
+
+  const debouncedReferralCheck = useCallback(
+    debounce(async (code) => {
+      if (!code) {
+        setValidationErrors(prev => ({
+          ...prev,
+          referal_code: t('auth.errors.referralCodeRequired')
+        }));
+        return;
+      }
+
+      setIsCheckingReferral(true);
+      try {
+        const isValid = await userAPI.validateReferralCode(code);
+        setIsReferralValid(isValid);
+        setValidationErrors(prev => ({
+          ...prev,
+          referal_code: isValid ? '' : t('auth.errors.referralCodeInvalid')
+        }));
+      } catch (error) {
+        console.error('Referral code validation error:', error);
+        setIsReferralValid(false);
+      } finally {
+        setIsCheckingReferral(false);
+      }
+    }, 500),
+    [t]
   );
 
   // Add this memoized value for form validity
@@ -177,20 +217,25 @@ export default function RegisterPage() {
     setError('');
     setIsLoading(true);
 
+    // If kodku exists, use it directly instead of looking it up
+    const introducer = await userAPI.getUserDetailsBykodku(kodku);
+
     try {
       if (!validateForm()) {
         return;
       }
 
       await userAPI.register({
-        username: formData.username,
         email: formData.email,
+        username: formData.username,
         password: formData.password,
         passwordConfirm: formData.passwordConfirm,
-        name: formData.name,
+        referal_code: introducer.id || null,
+        // kodku: kodku || null,
+        is_tenant: is_tenant === '1'
       });
 
-      router.push('/login?registered=true');
+      router.push('/login');
     } catch (error) {
       console.error('Registration error:', error);
       setError(error?.data?.message || error?.message || 'Failed to register');
@@ -228,6 +273,10 @@ export default function RegisterPage() {
         setIsEmailAvailable(false);
       }
     }
+
+    if (name === 'referal_code') {
+      debouncedReferralCheck(value);
+    }
   };
 
   // Clean up debounced functions
@@ -235,34 +284,40 @@ export default function RegisterPage() {
     return () => {
       debouncedUsernameCheck.cancel();
       debouncedEmailCheck.cancel();
+      debouncedReferralCheck.cancel();
     };
   }, []);
 
+  // Update useEffect to validate referral code on mount if kodku exists
+  useEffect(() => {
+    if (kodku) {
+      debouncedReferralCheck(kodku);
+    }
+  }, [kodku]);
+
   // Function to determine if the button should be disabled
   const isButtonDisabled = () => {
-
-
-
-    const state = isLoading ||
+    return (
+      isLoading ||
       !isUsernameAvailable ||
       !isEmailAvailable ||
+      !isReferralValid ||
       isCheckingUsername ||
       isCheckingEmail ||
+      isCheckingReferral ||
       !formData.password ||
       !formData.username ||
       !formData.email ||
-      !formData.name ||
+      !formData.referal_code ||
       formData.password !== formData.passwordConfirm ||
       !isFormValid
-
-    document.getElementById("register-button")?.disabled == state
-
-
-
-    return (
-      state
     );
   };
+
+  // If kodku exists, disable the referral code input
+  const isReferralInputDisabled = isLoading || !!kodku;
+
+  console.log("formData", formData)
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
@@ -291,6 +346,7 @@ export default function RegisterPage() {
                 <input
                   id="username"
                   name="username"
+                  autoComplete="username"
                   type="text"
                   required
                   className={`input-field ${validationErrors.username
@@ -325,7 +381,7 @@ export default function RegisterPage() {
               ) : null}
             </div>
 
-            {/* Name field */}
+            {/* Name field
             <div>
               <label htmlFor="name" className="block text-sm font-medium mb-2">
                 {t('auth.name')}
@@ -342,6 +398,8 @@ export default function RegisterPage() {
                 disabled={isLoading}
               />
             </div>
+            */}
+
 
             {/* Email field */}
             <div>
@@ -353,6 +411,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
+                  // autoComplete='email'
                   required
                   className={`input-field ${validationErrors.email
                     ? 'border-destructive'
@@ -395,6 +454,7 @@ export default function RegisterPage() {
                 <input
                   id="password"
                   name="password"
+                  autoComplete='new-password'
                   type={showPassword ? "text" : "password"}
                   required
                   className={`input-field pr-10 ${validationErrors.password ? 'border-destructive' : ''}`}
@@ -431,6 +491,7 @@ export default function RegisterPage() {
                 <input
                   id="passwordConfirm"
                   name="passwordConfirm"
+                  autoComplete='new-password'
                   type={showPassword ? "text" : "password"}
                   required
                   className={`input-field pr-10 ${validationErrors.passwordConfirm ? 'border-destructive' : ''}`}
@@ -445,6 +506,49 @@ export default function RegisterPage() {
                   {validationErrors.passwordConfirm}
                 </p>
               )}
+            </div>
+
+            {/* Referral Code field */}
+            <div>
+              <label htmlFor="referal_code" className="block text-sm font-medium mb-2">
+                {t('auth.referralCode')}
+              </label>
+              <div className="relative">
+                <input
+                  id="referal_code"
+                  name="referal_code"
+                  type="text"
+                  required
+                  className={`input-field ${validationErrors.referal_code
+                    ? 'border-destructive'
+                    : isReferralValid && formData.referal_code
+                      ? 'border-green-500'
+                      : ''
+                    }`}
+                  placeholder={t('auth.referralCodePlaceholder')}
+                  value={formData.referal_code}
+                  onChange={handleChange}
+                  disabled={isReferralInputDisabled}
+                />
+                {isCheckingReferral ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                ) : isReferralValid && formData.referal_code ? (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                    ✓
+                  </div>
+                ) : null}
+              </div>
+              {validationErrors.referal_code ? (
+                <p className="mt-1 text-sm text-destructive">
+                  {validationErrors.referal_code}
+                </p>
+              ) : isReferralValid && formData.referal_code ? (
+                <p className="mt-1 text-sm text-green-500">
+                  {t('auth.referralCodeValid')}
+                </p>
+              ) : null}
             </div>
           </div>
 

@@ -25,9 +25,9 @@ export default function LoginPage() {
   }, [searchParams]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
     setLoading(true);
+    setError('');
+    e.preventDefault();
 
     try {
       await userAPI.login(formData.email, formData.password);

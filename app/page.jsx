@@ -6,10 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import Link from 'next/link';
 import { ArrowRightIcon, HomeIcon, UsersIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { LanguageToggle } from '../components/LanguageToggle';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function HomePage() {
   const { user, isLoading } = useAuth();
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -39,10 +41,10 @@ export default function HomePage() {
             </Link>
             <div className="flex items-center gap-2">
               <Link href="/login" className="btn-secondary">
-                Login
+                {t('nav.login')}
               </Link>
               <Link href="/register" className="btn-primary">
-                Get Started
+                {t('nav.getStarted')}
               </Link>
             </div>
           </div>
@@ -55,18 +57,17 @@ export default function HomePage() {
         <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
           <div className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center">
             <h1 className="text-3xl font-bold leading-tight tracking-tighter md:text-6xl lg:leading-[1.1]">
-              Sublet Management{' '}
-              <span className="text-primary">Made Simple</span>
+              {t('hero.title')}
             </h1>
             <p className="max-w-[750px] text-lg text-muted-foreground sm:text-xl">
-              The easiest way to manage your sublet properties. Track rooms, tenants, and payments all in one place.
+              {t('hero.subtitle')}
             </p>
             <div className="flex gap-4 items-center">
               <Link href="/register" className="btn-primary">
-                Start Free Trial
+                {t('hero.startTrial')}
               </Link>
               <Link href="/login" className="btn-secondary">
-                View Demo <ArrowRightIcon className="ml-2 h-4 w-4" />
+                {t('hero.viewDemo')} <ArrowRightIcon className="ml-2 h-4 w-4" />
               </Link>
               <LanguageToggle />
             </div>
@@ -77,7 +78,7 @@ export default function HomePage() {
         <section className="container py-12 md:py-24 lg:py-32">
           <div className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center">
             <h2 className="text-2xl font-bold leading-tight tracking-tighter md:text-4xl">
-              Everything you need to manage your sublets
+              {t('features.title')}
             </h2>
             <div className="grid gap-8 md:grid-cols-3 md:gap-12">
               {/* Room Management */}
@@ -85,9 +86,11 @@ export default function HomePage() {
                 <div className="p-3 rounded-full bg-primary/10 text-primary">
                   <HomeIcon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold">Room Management</h3>
+                <h3 className="text-xl font-bold">
+                  {t('features.roomManagement.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Manage multiple rooms with detailed tracking of availability and tenant assignments.
+                  {t('features.roomManagement.description')}
                 </p>
               </div>
 
@@ -96,9 +99,11 @@ export default function HomePage() {
                 <div className="p-3 rounded-full bg-primary/10 text-primary">
                   <UsersIcon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold">Tenant Management</h3>
+                <h3 className="text-xl font-bold">
+                  {t('features.tenantManagement.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Keep track of tenant information, agreements, and payment history in one place.
+                  {t('features.tenantManagement.description')}
                 </p>
               </div>
 
@@ -107,9 +112,11 @@ export default function HomePage() {
                 <div className="p-3 rounded-full bg-primary/10 text-primary">
                   <CurrencyDollarIcon className="w-6 h-6" />
                 </div>
-                <h3 className="text-xl font-bold">Payment Tracking</h3>
+                <h3 className="text-xl font-bold">
+                  {t('features.paymentTracking.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Track rental payments and deposits with automated status updates.
+                  {t('features.paymentTracking.description')}
                 </p>
               </div>
             </div>
@@ -122,10 +129,10 @@ export default function HomePage() {
             {/* Success Stories */}
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Transform Your Property Management Experience
+                {t('appeal.title')}
               </h2>
               <p className="text-lg text-muted-foreground">
-                Join hundreds of property managers who have simplified their lives with BilikKu
+                {t('appeal.subtitle')}
               </p>
             </div>
 
@@ -133,37 +140,41 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 gap-8">
               {/* Time Savings */}
               <div className="glass-card p-6">
-                <h3 className="text-xl font-bold mb-2">Save 10+ Hours Weekly</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {t('appeal.timeSaving.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Stop juggling spreadsheets and paperwork. Our automated system handles the tedious tasks, 
-                  giving you back precious time to focus on what matters most.
+                  {t('appeal.timeSaving.description')}
                 </p>
               </div>
 
               {/* Stress Reduction */}
               <div className="glass-card p-6">
-                <h3 className="text-xl font-bold mb-2">Reduce Management Stress</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {t('appeal.stressReduction.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Never miss a payment or forget a tenant request again. Our organized system keeps 
-                  everything in check, bringing peace of mind to your property management.
+                  {t('appeal.stressReduction.description')}
                 </p>
               </div>
 
               {/* Financial Control */}
               <div className="glass-card p-6">
-                <h3 className="text-xl font-bold mb-2">Better Financial Control</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {t('appeal.financialControl.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Track every payment, deposit, and expense in real-time. Make informed decisions 
-                  with clear financial insights at your fingertips.
+                  {t('appeal.financialControl.description')}
                 </p>
               </div>
 
               {/* Growth Potential */}
               <div className="glass-card p-6">
-                <h3 className="text-xl font-bold mb-2">Scale Your Business</h3>
+                <h3 className="text-xl font-bold mb-2">
+                  {t('appeal.growth.title')}
+                </h3>
                 <p className="text-muted-foreground">
-                  Whether you manage 5 or 500 rooms, BilikKu grows with you. Our platform makes it 
-                  easy to expand your property portfolio without the added stress.
+                  {t('appeal.growth.description')}
                 </p>
               </div>
             </div>
@@ -171,8 +182,8 @@ export default function HomePage() {
             {/* Testimonial */}
             <div className="glass-card p-8 mt-12">
               <blockquote className="text-lg text-center italic">
-                "Before BilikKu, I was drowning in paperwork and constantly chasing payments. 
-                Now, I manage twice as many properties in half the time. It's completely transformed 
+                "Before BilikKu, I was drowning in paperwork and constantly chasing payments.
+                Now, I manage twice as many properties in half the time. It's completely transformed
                 how I run my business."
               </blockquote>
               <div className="text-center mt-4">
@@ -187,10 +198,10 @@ export default function HomePage() {
                 href="/register"
                 className="btn-primary inline-flex items-center text-lg px-8 py-3"
               >
-                Start Your Transformation Today
+                {t('nav.getStarted')}
               </Link>
               <p className="mt-4 text-sm text-muted-foreground">
-                Join our community of successful property managers
+                {t('appeal.joinCommunity')}
               </p>
             </div>
           </div>
@@ -200,18 +211,24 @@ export default function HomePage() {
         <section className="container py-12 md:py-24 lg:py-32">
           <div className="mx-auto flex max-w-[980px] flex-col items-center gap-4 text-center">
             <h2 className="text-2xl font-bold leading-tight tracking-tighter md:text-4xl">
-              Simple, transparent pricing
+              {t('pricing.title')}
             </h2>
             <div className="mx-auto w-full max-w-sm rounded-lg border border-border bg-card p-8">
-              <h3 className="text-2xl font-bold">Free Trial</h3>
+              <h3 className="text-2xl font-bold">
+                {t('pricing.freeTrial')}
+              </h3>
               <div className="mt-4 flex items-baseline justify-center gap-x-2">
-                <span className="text-5xl font-bold">RM 0</span>
+                <span className="text-5xl font-bold">
+                  {t('pricing.price')}
+                </span>
               </div>
               <p className="mt-6 text-muted-foreground">
-                Try BilikKu free for 14 days. No credit card required.
+                {t('pricing.trialDescription')}
               </p>
               <div className="mt-8">
-                <h4 className="text-sm font-semibold">What's included</h4>
+                <h4 className="text-sm font-semibold">
+                  {t('pricing.includes')}
+                </h4>
                 <ul className="mt-4 space-y-3 text-sm">
                   <li className="flex items-center">
                     <svg className="h-5 w-5 text-primary" viewBox="0 0 20 20" fill="currentColor">
@@ -237,7 +254,7 @@ export default function HomePage() {
                 href="/register"
                 className="mt-8 block w-full btn-primary"
               >
-                Get Started
+                {t('pricing.getStarted')}
               </Link>
             </div>
           </div>
