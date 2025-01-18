@@ -11,6 +11,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { roomAPI, subletAPI } from '../../../services/api';
 
 export default function RoomsPage() {
   const { user, pb } = useAuth();
@@ -34,7 +35,7 @@ export default function RoomsPage() {
 
   const loadSublets = async () => {
     try {
-      const records = await pb.collection("bilikku_sublets").getList(1, 50, {
+      const records = await subletAPI.getList(1, 50, {
         sort: "name",
         fields: "id,name",
       });
@@ -46,22 +47,14 @@ export default function RoomsPage() {
 
   const loadRooms = async () => {
     try {
-      pb.autoCancellation(false);
-
-      const records = await pb.collection("bilikku_rooms").getList(1, 50, {
-        sort: "-created",
-      });
-
-      console.log("records", records);
-
+      const records = await roomAPI.getList();
       setRooms(records.items);
-
+      
       // Extract unique room types
       const types = [...new Set(records.items.map(room => room.type))];
       setRoomTypes(types);
-
+      
       setError(null);
-      pb.autoCancellation(true);
     } catch (err) {
       console.error("Error loading rooms:", err);
       setError(err.message || "Failed to load rooms");
@@ -74,7 +67,7 @@ export default function RoomsPage() {
     if (!confirm("Are you sure you want to delete this room?")) return;
 
     try {
-      await pb.collection("bilikku_rooms").delete(id);
+      await roomAPI.delete(id);
       await loadRooms();
     } catch (err) {
       console.error("Error deleting room:", err);

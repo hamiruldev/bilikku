@@ -1,16 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useLanguage } from '../../context/LanguageContext';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import debounce from 'lodash.debounce';
+import { userAPI } from '../../services/api';
 
 export default function RegisterPage() {
-  const { register, validateUsername, validateEmail } = useAuth();
-  const { t } = useLanguage();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -88,14 +85,60 @@ export default function RegisterPage() {
     []
   );
 
+  // Add this memoized value for form validity
+  const isFormValid = useMemo(() => {
+    const errors = {};
+    let isValid = true;
+
+    // Username validation
+    if (formData.username.length < 3) {
+      errors.username = t('auth.errors.usernameTooShort');
+      isValid = false;
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      errors.username = t('auth.errors.usernameInvalid');
+      isValid = false;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      errors.email = t('auth.errors.emailInvalid');
+      isValid = false;
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      errors.password = t('auth.errors.passwordTooShort');
+      isValid = false;
+    } else {
+
+      if (!/[a-z]/.test(formData.password)) {
+        errors.password = t('auth.errors.passwordNoLowercase');
+        isValid = false;
+      }
+      if (!/[0-9]/.test(formData.password)) {
+        errors.password = t('auth.errors.passwordNoNumber');
+        isValid = false;
+      }
+    }
+
+    // Password confirmation validation
+    if (formData.password !== formData.passwordConfirm) {
+      errors.passwordConfirm = t('auth.errors.passwordMismatch');
+      isValid = false;
+    }
+
+    return isValid;
+  }, [formData, t]); // Dependencies for useMemo
+
+  // Update the validateForm function to use the memoized validation
   const validateForm = () => {
     const errors = {};
 
     // Username validation
     if (formData.username.length < 3) {
       errors.username = t('auth.errors.usernameTooShort');
-    }
-    if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
       errors.username = t('auth.errors.usernameInvalid');
     }
 
@@ -108,15 +151,16 @@ export default function RegisterPage() {
     // Password validation
     if (formData.password.length < 8) {
       errors.password = t('auth.errors.passwordTooShort');
-    }
-    if (!/[A-Z]/.test(formData.password)) {
-      errors.password = t('auth.errors.passwordNoUppercase');
-    }
-    if (!/[a-z]/.test(formData.password)) {
-      errors.password = t('auth.errors.passwordNoLowercase');
-    }
-    if (!/[0-9]/.test(formData.password)) {
-      errors.password = t('auth.errors.passwordNoNumber');
+    } else {
+      // if (!/[A-Z]/.test(formData.password)) {
+      //  errors.password = t('auth.errors.passwordNoUppercase');
+      // }
+      if (!/[a-z]/.test(formData.password)) {
+        errors.password = t('auth.errors.passwordNoLowercase');
+      }
+      if (!/[0-9]/.test(formData.password)) {
+        errors.password = t('auth.errors.passwordNoNumber');
+      }
     }
 
     // Password confirmation validation
@@ -131,20 +175,25 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
-    // Validate form before submission
-    if (!validateForm()) {
-      return;
-    }
-
     setIsLoading(true);
 
     try {
-      await register(formData.email, formData.password, formData.name, formData.username);
-      router.push('/dashboard');
-    } catch (err) {
-      console.error('Registration error:', err);
-      setError(err.message || t('auth.registerError'));
+      if (!validateForm()) {
+        return;
+      }
+
+      await userAPI.register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        passwordConfirm: formData.passwordConfirm,
+        name: formData.name,
+      });
+
+      router.push('/login?registered=true');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError(error?.data?.message || error?.message || 'Failed to register');
     } finally {
       setIsLoading(false);
     }
@@ -164,11 +213,20 @@ export default function RegisterPage() {
     }));
 
     // Trigger real-time validation for username and email
-    if (name === 'username' && value.length >= 3) {
-      debouncedUsernameCheck(value);
+    if (name === 'username') {
+      if (value.length >= 3) {
+        debouncedUsernameCheck(value);
+      } else {
+        setIsUsernameAvailable(false);
+      }
     }
-    if (name === 'email' && value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      debouncedEmailCheck(value);
+
+    if (name === 'email') {
+      if (value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+        debouncedEmailCheck(value);
+      } else {
+        setIsEmailAvailable(false);
+      }
     }
   };
 
@@ -180,11 +238,32 @@ export default function RegisterPage() {
     };
   }, []);
 
-  console.log("isUsernameAvailable-->", isUsernameAvailable);
-  console.log("isEmailAvailable-->", isEmailAvailable);
-  console.log("isCheckingEmail-->", isCheckingEmail);
-  console.log("isCheckingUsername-->", isCheckingUsername);
-  console.log("validationErrors-->", validationErrors);
+  // Function to determine if the button should be disabled
+  const isButtonDisabled = () => {
+
+
+
+    const state = isLoading ||
+      !isUsernameAvailable ||
+      !isEmailAvailable ||
+      isCheckingUsername ||
+      isCheckingEmail ||
+      !formData.password ||
+      !formData.username ||
+      !formData.email ||
+      !formData.name ||
+      formData.password !== formData.passwordConfirm ||
+      !isFormValid
+
+    document.getElementById("register-button")?.disabled == state
+
+
+
+    return (
+      state
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
@@ -215,10 +294,10 @@ export default function RegisterPage() {
                   type="text"
                   required
                   className={`input-field ${validationErrors.username
-                      ? 'border-destructive'
-                      : isUsernameAvailable && formData.username.length >= 3
-                        ? 'border-green-500'
-                        : ''
+                    ? 'border-destructive'
+                    : isUsernameAvailable && formData.username.length >= 3
+                      ? 'border-green-500'
+                      : ''
                     }`}
                   placeholder={t('auth.usernamePlaceholder')}
                   value={formData.username}
@@ -276,10 +355,10 @@ export default function RegisterPage() {
                   type="email"
                   required
                   className={`input-field ${validationErrors.email
-                      ? 'border-destructive'
-                      : isEmailAvailable && formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-                        ? 'border-green-500'
-                        : ''
+                    ? 'border-destructive'
+                    : isEmailAvailable && formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
+                      ? 'border-green-500'
+                      : ''
                     }`}
                   placeholder={t('auth.emailPlaceholder')}
                   value={formData.email}
@@ -369,21 +448,15 @@ export default function RegisterPage() {
             </div>
           </div>
 
+
           <button
+            id="register-button"
             type="submit"
             className="btn-primary w-full"
-            disabled={
-              isLoading ||
-              !isUsernameAvailable ||
-              !isEmailAvailable ||
-              isCheckingUsername ||
-              isCheckingEmail ||
-              !formData.password ||
-              formData.password !== formData.passwordConfirm ||
-              Object.keys(validationErrors).length > 0
-            }
           >
             {isLoading ? t('common.loading') : t('auth.register')}
+            {isButtonDisabled()}
+
           </button>
 
           <p className="text-center text-sm">

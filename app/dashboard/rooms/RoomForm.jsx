@@ -5,6 +5,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { roomAPI } from '../../../services/api';
 
 const ROOM_TYPES = [
   'Single Room',
@@ -60,16 +61,9 @@ export default function RoomForm({ action }) {
       loadRoom();
     }
   }, [isEditing, action]);
-
   const loadSublets = async () => {
     try {
-      const records = await pb.collection('bilikku_sublets').getList(1, 50, {
-        sort: 'name',
-        fields: 'id,name'
-      });
-
-
-      console.log("records loadSublets-->", records);
+      const records = await roomAPI.getList();
       setSublets(records.items);
     } catch (err) {
       console.error('Error loading sublets:', err);
@@ -79,8 +73,7 @@ export default function RoomForm({ action }) {
 
   const loadRoom = async () => {
     try {
-      const record = await pb.collection('bilikku_rooms').getOne(action);
-      console.log("record loadRoom-->", record);
+      const record = await roomAPI.getRoom(action);
       setFormData({
         ...record,
         amenities: JSON.parse(record.amenities) || [],
@@ -103,9 +96,9 @@ export default function RoomForm({ action }) {
       };
 
       if (isEditing) {
-        await pb.collection('bilikku_rooms').update(action, dataToSend);
+        await roomAPI.updateRoom(action, dataToSend);
       } else {
-        await pb.collection('bilikku_rooms').create(dataToSend);
+        await roomAPI.createRoom(dataToSend);
       }
       router.push('/dashboard/rooms');
     } catch (err) {

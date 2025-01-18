@@ -11,6 +11,7 @@ import {
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
+import { dashboardAPI } from '../../services/api';
 
 export default function DashboardPage() {
   const { user, logout, isLoading, pb } = useAuth();
@@ -45,45 +46,14 @@ export default function DashboardPage() {
     const loadDashboardData = async () => {
       try {
         if (user?.isAdmin) {
-          pb.autoCancellation(false);
-
-          const [rooms, tenants] = await Promise.all([
-            pb.collection('bilikku_rooms').getList(1, 50),
-            pb.collection('bilikku_tenants').getList(1, 50),
-          ]);
-
-          pb.autoCancellation(true);
-
+          const stats = await dashboardAPI.getAdminStats();
           if (isSubscribed) {
-            setAdminStats({
-              totalRooms: rooms.totalItems,
-              occupiedRooms: rooms.items.filter(room => room.status === 'occupied').length,
-              availableRooms: rooms.items.filter(room => room.status === 'available').length,
-              totalTenants: tenants.totalItems,
-              pendingPayments: 0,
-              monthlyRevenue: 0
-            });
+            setAdminStats(stats);
           }
         } else {
-          pb.autoCancellation(false);
-
-          const tenant = await pb.collection('bilikku_tenants').getFirstListItem(`user_id="${user?.id}"`);
-          const room = await pb.collection('bilikku_rooms').getOne(tenant.room_id);
-          const payments = await pb.collection('bilikku_payments').getList(1, 10, {
-            filter: `tenant_id="${tenant.id}"`,
-            sort: '-payment_date'
-          });
-
-          pb.autoCancellation(true);
-
+          const stats = await dashboardAPI.getTenantStats(user.id);
           if (isSubscribed) {
-            setTenantStats({
-              roomNumber: room.number,
-              rentDueDate: tenant.rent_due_date,
-              rentAmount: tenant.rent_amount,
-              pendingPayments: payments.items.filter(p => p.status === 'pending').length,
-              lastPaymentDate: payments.items[0]?.payment_date || 'No payments yet',
-            });
+            setTenantStats(stats);
           }
         }
         setError(null);
@@ -103,9 +73,8 @@ export default function DashboardPage() {
 
     return () => {
       isSubscribed = false;
-      pb.autoCancellation(true);
     };
-  }, [user, pb]);
+  }, [user]);
 
   if (loading) {
     return (

@@ -2,10 +2,9 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import { userAPI } from '../../services/api';
 
 export default function ForgotPasswordPage() {
-  const { pb } = useAuth();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -17,11 +16,11 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      await pb.collection('usersku').requestPasswordReset(email);
+      await userAPI.requestPasswordReset(email);
       setResetSent(true);
     } catch (error) {
       console.error('Password reset error:', error);
-      setError(error?.data?.message || error?.message || 'Failed to send reset email. Please try again.');
+      setError(error?.data?.message || error?.message || 'Failed to send reset email');
     } finally {
       setLoading(false);
     }
@@ -53,7 +52,7 @@ export default function ForgotPasswordPage() {
                 onClick={async () => {
                   try {
                     setLoading(true);
-                    await pb.collection('usersku').requestPasswordReset(email);
+                    await userAPI.requestPasswordReset(email);
                     alert('Reset email resent!');
                   } catch (error) {
                     console.error('Error resending reset email:', error);

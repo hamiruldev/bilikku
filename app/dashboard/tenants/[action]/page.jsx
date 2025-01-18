@@ -1,10 +1,10 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useAuth } from '../../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { userAPI, roomAPI, tenantAPI } from '../../../../services/api';
 
 const initialFormData = {
     no_tenants: '',
@@ -17,7 +17,6 @@ const initialFormData = {
 };
 
 export default function TenantFormPage({ params }) {
-    const { pb } = useAuth();
     const router = useRouter();
     const isEditing = params.action !== 'new';
 
@@ -65,9 +64,7 @@ export default function TenantFormPage({ params }) {
 
     const loadUsers = async () => {
         try {
-            const records = await pb.collection('usersku').getList(1, 50, {
-                sort: 'username',
-            });
+            const records = await userAPI.getAllUsers();
             setUsers(records.items);
         } catch (err) {
             console.error('Error loading users:', err);
@@ -77,10 +74,7 @@ export default function TenantFormPage({ params }) {
 
     const loadRooms = async () => {
         try {
-            const records = await pb.collection('bilikku_rooms').getList(1, 50, {
-                sort: '-created',
-                filter: 'status="available"',
-            });
+            const records = await roomAPI.getAvailableRooms();
             setRooms(records.items);
         } catch (err) {
             console.error('Error loading rooms:', err);
@@ -90,9 +84,7 @@ export default function TenantFormPage({ params }) {
 
     const loadTenant = async () => {
         try {
-            const record = await pb.collection('bilikku_tenants').getOne(params.action, {
-                expand: 'tenant_name,room_name',
-            });
+            const record = await tenantAPI.getOneWithExpand(params.action);
             setFormData({
                 no_tenants: record.no_tenants || '',
                 tenant_name: record.tenant_name || '',
@@ -113,18 +105,11 @@ export default function TenantFormPage({ params }) {
         setError('');
 
         try {
-            const data = {
-                ...formData,
-                lease_start: formData.lease_start ? new Date(formData.lease_start).toISOString() : null,
-                lease_end: formData.lease_end ? new Date(formData.lease_end).toISOString() : null,
-            };
-
             if (isEditing) {
-                await pb.collection('bilikku_tenants').update(params.action, data);
+                await tenantAPI.updateTenant(params.action, formData);
             } else {
-                await pb.collection('bilikku_tenants').create(data);
+                await tenantAPI.createTenant(formData);
             }
-
             router.push('/dashboard/tenants');
         } catch (err) {
             console.error('Error saving tenant:', err);

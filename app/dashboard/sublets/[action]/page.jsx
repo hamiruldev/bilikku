@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "../../../../context/AuthContext";
 import { useRouter } from "next/navigation";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { subletAPI } from '../../../../services/api';
 
 const initialFormData = {
   name: "",
@@ -25,10 +25,7 @@ const initialFormData = {
 };
 
 export default function SubletFormPage({ params }) {
-  const { pb } = useAuth();
   const router = useRouter();
-
-  
   const isEditing = params.action && params.action !== "new";
 
   const [formData, setFormData] = useState(initialFormData);
@@ -40,7 +37,7 @@ export default function SubletFormPage({ params }) {
 
     const loadSublet = async () => {
       try {
-        const record = await pb.collection("bilikku_sublets").getOne(params.action);
+        const record = await subletAPI.getOne(params.action);
         if (isSubscribed) {
           setFormData({
             ...record,
@@ -62,7 +59,7 @@ export default function SubletFormPage({ params }) {
     return () => {
       isSubscribed = false;
     };
-  }, [isEditing, params.action, pb]);
+  }, [isEditing, params.action]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -70,36 +67,11 @@ export default function SubletFormPage({ params }) {
     setError("");
 
     try {
-      const dataToSend = {
-        name: formData.name,
-        address: formData.address,
-        total_room: formData.total_room,
-        rental_price_per_month: formData.rental_price_per_month,
-        deposit_amount: formData.deposit_amount,
-        status: formData.status,
-        description: formData.description,
-        location: formData.location,
-        total_occupied_rooms: formData.total_occupied_rooms,
-      };
-
       if (isEditing) {
-        await pb.collection("bilikku_sublets").update(params.action, dataToSend);
+        await subletAPI.update(params.action, formData);
       } else {
-        const formDataToSend = new FormData();
-        Object.entries(formData).forEach(([key, value]) => {
-          if (key === "location" || key === "amenities" || key === "rules") {
-            formDataToSend.append(key, JSON.stringify(value));
-          } else if (key === "images") {
-            value.forEach((file) => {
-              formDataToSend.append("images", file);
-            });
-          } else {
-            formDataToSend.append(key, value.toString());
-          }
-        });
-        await pb.collection("bilikku_sublets").create(formDataToSend);
+        await subletAPI.create(formData);
       }
-
       router.push("/dashboard/sublets");
     } catch (error) {
       console.error("Error saving sublet:", error);

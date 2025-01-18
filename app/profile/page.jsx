@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { UserCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
+import { userAPI } from '../../services/api';
 
 const initialProfile = {
   avatar_url: '',
@@ -28,7 +29,7 @@ export default function ProfilePage() {
     const loadProfile = async () => {
       if (!user?.id) return;
       try {
-        const record = await pb.collection('usersku').getOne(user.id);
+        const record = await userAPI.getProfile(user.id);
         setProfile({
           ...record,
           bank_details: record.bank_details ? JSON.parse(record.bank_details) : {
@@ -43,7 +44,7 @@ export default function ProfilePage() {
     };
 
     loadProfile();
-  }, [user, pb]);
+  }, [user]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,7 +61,7 @@ export default function ProfilePage() {
         }
       });
 
-      await pb.collection('usersku').update(user.id, formData);
+      await userAPI.updateProfile(user.id, formData);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
     } catch (error) {
       console.error('Update error:', error);
@@ -78,7 +79,7 @@ export default function ProfilePage() {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const record = await pb.collection('usersku').update(user.id, formData);
+      const record = await userAPI.updateProfile(user.id, formData);
       setProfile(prev => ({ ...prev, avatar_url: record.avatar_url }));
       setMessage({ type: 'success', text: 'Profile picture updated!' });
     } catch (error) {

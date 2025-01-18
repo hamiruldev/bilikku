@@ -4,19 +4,16 @@ import { useEffect, useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "../../../context/AuthContext";
+import { subletAPI } from '../../../services/api';
 
 export default function SubletListPage() {
-  const { pb, user } = useAuth();
   const router = useRouter();
   const [sublets, setSublets] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const loadSublets = async () => {
     try {
-      const records = await pb.collection("bilikku_sublets").getList(1, 50, {
-        sort: "-created",
-      });
+      const records = await subletAPI.getList();
       setSublets(records.items);
     } catch (error) {
       console.error("Error loading sublets:", error);
@@ -33,7 +30,7 @@ export default function SubletListPage() {
     if (!confirm("Are you sure you want to delete this sublet?")) return;
 
     try {
-      await pb.collection("bilikku_sublets").delete(id);
+      await subletAPI.delete(id);
       await loadSublets();
     } catch (error) {
       console.error("Error deleting sublet:", error);

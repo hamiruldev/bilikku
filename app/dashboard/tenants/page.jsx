@@ -1,18 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
 import { useRouter } from 'next/navigation';
-import {
-    PlusIcon,
-    PencilIcon,
-    TrashIcon,
-    MagnifyingGlassIcon,
-} from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { getUsername, formatDate } from '../../../lib/helpers';
+import { formatDate } from '../../../lib/helpers';
 import { LoadingTable } from '../../../components/LoadingTable';
+import { tenantAPI } from '../../../services/api';
 
 // Separate component for tenant table content
 function TenantsTableContent({ tenants, onDelete, t, locale, isLoading }) {
@@ -75,7 +70,6 @@ function TenantsTableContent({ tenants, onDelete, t, locale, isLoading }) {
 }
 
 export default function TenantsPage() {
-    const { pb } = useAuth();
     const { t, locale } = useLanguage();
     const [tenants, setTenants] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -84,19 +78,8 @@ export default function TenantsPage() {
 
     const loadTenants = async () => {
         try {
-            const records = await pb.collection('bilikku_tenants').getList(1, 50, {
-                sort: '-created',
-                expand: 'room_name',
-            });
-
-            const tenantsWithUsernames = await Promise.all(
-                records.items.map(async (tenant) => {
-                    const username = await getUsername(pb, tenant.tenant_name);
-                    return { ...tenant, username };
-                })
-            );
-
-            setTenants(tenantsWithUsernames);
+            const tenantsWithDetails = await tenantAPI.getListWithDetails();
+            setTenants(tenantsWithDetails);
             setError('');
         } catch (err) {
             console.error('Error loading tenants:', err);
@@ -115,7 +98,7 @@ export default function TenantsPage() {
 
         try {
             setIsLoading(true);
-            await pb.collection('bilikku_tenants').delete(id);
+            await tenantAPI.delete(id);
             await loadTenants();
         } catch (err) {
             console.error('Error deleting tenant:', err);

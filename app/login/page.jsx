@@ -3,15 +3,13 @@
 import React from 'react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { pb } from '../../lib/pocketbase';
+import { userAPI } from '../../services/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { login } = useAuth();
   const [formData, setFormData] = useState({
     email: searchParams?.get('email') || '',
     password: '',
@@ -32,11 +30,11 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(formData.email, formData.password);
+      await userAPI.login(formData.email, formData.password);
       router.push('/dashboard');
     } catch (error) {
       console.error('Auth error:', error);
-      setError(error?.data?.message || error?.message || 'Failed to login. Please try again.');
+      setError(error?.data?.message || error?.message || 'Failed to login');
     } finally {
       setLoading(false);
     }
