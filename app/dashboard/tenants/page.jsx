@@ -75,8 +75,12 @@ export default function TenantsPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    let hasLoaded = false;
 
     const loadTenants = async () => {
+        if (hasLoaded) return;
+        hasLoaded = true;
+
         try {
             const tenantsWithDetails = await tenantAPI.getListWithDetails();
             setTenants(tenantsWithDetails);

@@ -5,15 +5,15 @@ import { useAuth } from '../../../context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-import { roomAPI } from '../../../services/api';
+import { roomAPI, subletAPI } from '../../../services/api';
 
 const ROOM_TYPES = [
-  'Single Room',
-  'Master Room',
-  'Middle Room',
-  'Small Room',
-  'Studio',
-  'Entire Unit'
+  'single',
+  'master',
+  'middle',
+  'small',
+  'studio',
+  'entire unit'
 ];
 
 const COMMON_AMENITIES = [
@@ -44,10 +44,11 @@ const initialFormData = {
   max_occupants: 1,
 };
 
-export default function RoomForm({ action }) {
+export default function RoomForm({ params }) {
+
   const { pb } = useAuth();
   const router = useRouter();
-  const isEditing = action && action !== 'new';
+  const isEditing = params.action && params.action !== 'new';
 
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
@@ -55,15 +56,20 @@ export default function RoomForm({ action }) {
   const [sublets, setSublets] = useState([]);
   const [newAmenity, setNewAmenity] = useState('');
 
+  let hasLoaded = false;
+
   useEffect(() => {
     loadSublets();
     if (isEditing) {
       loadRoom();
     }
-  }, [isEditing, action]);
+  }, [isEditing, params]);
+
   const loadSublets = async () => {
+
+
     try {
-      const records = await roomAPI.getList();
+      const records = await subletAPI.getList();
       setSublets(records.items);
     } catch (err) {
       console.error('Error loading sublets:', err);
@@ -72,11 +78,16 @@ export default function RoomForm({ action }) {
   };
 
   const loadRoom = async () => {
+
+    if (hasLoaded) return;
+    hasLoaded = true;
+
     try {
-      const record = await roomAPI.getRoom(action);
+      const record = await roomAPI.getOne(params.id);
+
       setFormData({
         ...record,
-        amenities: JSON.parse(record.amenities) || [],
+        amenities: !record.amenities == '' ? JSON.parse(record.amenities) : [],
       });
     } catch (err) {
       console.error('Error loading room:', err);
@@ -96,7 +107,7 @@ export default function RoomForm({ action }) {
       };
 
       if (isEditing) {
-        await roomAPI.updateRoom(action, dataToSend);
+        await roomAPI.updateRoom(params, dataToSend);
       } else {
         await roomAPI.createRoom(dataToSend);
       }
@@ -128,7 +139,9 @@ export default function RoomForm({ action }) {
     }
   };
 
-  console.log("formData-->", formData);
+
+  console.log("sublets", sublets)
+  console.log("formData", formData)
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -171,14 +184,14 @@ export default function RoomForm({ action }) {
                     </label>
                     <select
                       className="input-field"
-                      value={formData.sublet_id}
+                      value={formData.house || ''}
                       onChange={(e) =>
-                        setFormData({ ...formData, sublet_id: e.target.value })
+                        setFormData({ ...formData, house: e.target.value })
                       }
                       required
                     >
                       <option value="">Select a sublet</option>
-                      {sublets.map(sublet => (
+                      {sublets.map((sublet) => (
                         <option key={sublet.id} value={sublet.id}>
                           {sublet.name}
                         </option>
@@ -193,7 +206,7 @@ export default function RoomForm({ action }) {
                     <input
                       type="text"
                       className="input-field"
-                      value={formData.number}
+                      value={formData.name}
                       onChange={(e) =>
                         setFormData({ ...formData, number: e.target.value })
                       }
@@ -225,7 +238,7 @@ export default function RoomForm({ action }) {
 
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Floor *
+                      Floor
                     </label>
                     <input
                       type="text"
@@ -234,7 +247,7 @@ export default function RoomForm({ action }) {
                       onChange={(e) =>
                         setFormData({ ...formData, floor: e.target.value })
                       }
-                      required
+                      //required
                       placeholder="e.g., Ground Floor, First Floor"
                     />
                   </div>
@@ -267,11 +280,11 @@ export default function RoomForm({ action }) {
                     <input
                       type="number"
                       className="input-field"
-                      value={formData.size_sqft}
+                      value={formData.room_size}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
-                          size_sqft: parseInt(e.target.value)
+                          room_size: parseInt(e.target.value)
                         })
                       }
                       min="0"

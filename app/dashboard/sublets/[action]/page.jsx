@@ -37,7 +37,8 @@ export default function SubletFormPage({ params }) {
 
     const loadSublet = async () => {
       try {
-        const record = await subletAPI.getOne(params.action);
+
+        const record = await subletAPI.getOne(params.id);
         if (isSubscribed) {
           setFormData({
             ...record,

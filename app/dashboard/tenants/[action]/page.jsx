@@ -32,10 +32,13 @@ export default function TenantFormPage({ params }) {
     useEffect(() => {
         loadUsers();
         loadRooms();
-        if (isEditing) {
+    }, []);
+
+    useEffect(() => {
+        if (isEditing && users.length > 0) {
             loadTenant();
         }
-    }, [isEditing, params.action]);
+    }, [isEditing, users]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -74,7 +77,7 @@ export default function TenantFormPage({ params }) {
 
     const loadRooms = async () => {
         try {
-            const records = await roomAPI.getAvailableRooms();
+            const records = isEditing ? await roomAPI.getList() : await roomAPI.getAvailableRooms();
             setRooms(records.items);
         } catch (err) {
             console.error('Error loading rooms:', err);
@@ -85,14 +88,22 @@ export default function TenantFormPage({ params }) {
     const loadTenant = async () => {
         try {
             const record = await tenantAPI.getOneWithExpand(params.action);
+
+            const tenantUser = users.find(user => user.id === record.tenant_name);
+            const tenantRooms = rooms.find(room => room.id === record.room_name);
+
             setFormData({
                 no_tenants: record.no_tenants || '',
                 tenant_name: record.tenant_name || '',
+                tenant_display: tenantUser?.username || '',
+                room_display: tenantRooms?.name || '',
                 room_name: record.room_name || '',
                 deposit: record.deposit || false,
                 lease_start: record.lease_start ? record.lease_start.split(' ')[0] : '',
                 lease_end: record.lease_end ? record.lease_end.split(' ')[0] : '',
             });
+
+            setSearchTerm(tenantUser?.username || '');
         } catch (err) {
             console.error('Error loading tenant:', err);
             setError('Failed to load tenant');
@@ -118,7 +129,6 @@ export default function TenantFormPage({ params }) {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="min-h-screen bg-background relative">

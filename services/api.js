@@ -1,21 +1,21 @@
 // Import PocketBase instance
-import { pb } from '../lib/pocketbase';
+import { pb } from "../lib/pocketbase";
 
 // User related API calls
 export const userAPI = {
   // Authentication
   login: async (email, password) => {
-    return await pb.collection('usersku').authWithPassword(email, password);
+    return await pb.collection("usersku").authWithPassword(email, password);
   },
 
   register: async (userData) => {
-    return await pb.collection('usersku').create(userData);
+    return await pb.collection("usersku").create(userData);
   },
 
   validateUsername: async (username) => {
     try {
-      const result = await pb.collection('usersku').getList(1, 1, {
-        filter: `username = "${username}"`
+      const result = await pb.collection("usersku").getList(1, 1, {
+        filter: `username = "${username}"`,
       });
       return result.items.length === 0;
     } catch (error) {
@@ -25,8 +25,8 @@ export const userAPI = {
 
   validateEmail: async (email) => {
     try {
-      const result = await pb.collection('usersku').getList(1, 1, {
-        filter: `email = "${email}"`
+      const result = await pb.collection("usersku").getList(1, 1, {
+        filter: `email = "${email}"`,
       });
       return result.items.length === 0;
     } catch (error) {
@@ -35,22 +35,22 @@ export const userAPI = {
   },
 
   requestPasswordReset: async (email) => {
-    return await pb.collection('usersku').requestPasswordReset(email);
+    return await pb.collection("usersku").requestPasswordReset(email);
   },
 
   // Profile management
   getProfile: async (userId) => {
-    return await pb.collection('usersku').getOne(userId);
+    return await pb.collection("usersku").getOne(userId);
   },
 
   updateProfile: async (userId, formData) => {
-    return await pb.collection('usersku').update(userId, formData);
+    return await pb.collection("usersku").update(userId, formData);
   },
 
   getAllUsers: async (page = 1, perPage = 50, options = {}) => {
-    return await pb.collection('usersku').getList(page, perPage, {
-      sort: 'username',
-      ...options
+    return await pb.collection("usersku").getList(page, perPage, {
+      sort: "username",
+      ...options,
     });
   },
 };
@@ -58,31 +58,31 @@ export const userAPI = {
 // Room related API calls
 export const roomAPI = {
   getList: async (page = 1, perPage = 50, options = {}) => {
-    return await pb.collection('bilikku_rooms').getList(page, perPage, {
-      sort: '-created',
+    return await pb.collection("bilikku_rooms").getList(page, perPage, {
+      sort: "-created",
       ...options,
     });
   },
 
   getOne: async (id) => {
-    return await pb.collection('bilikku_rooms').getOne(id);
+    return await pb.collection("bilikku_rooms").getOne(id);
   },
 
   create: async (data) => {
-    return await pb.collection('bilikku_rooms').create(data);
+    return await pb.collection("bilikku_rooms").create(data);
   },
 
   update: async (id, data) => {
-    return await pb.collection('bilikku_rooms').update(id, data);
+    return await pb.collection("bilikku_rooms").update(id, data);
   },
 
   delete: async (id) => {
-    return await pb.collection('bilikku_rooms').delete(id);
+    return await pb.collection("bilikku_rooms").delete(id);
   },
 
   getAvailableRooms: async (page = 1, perPage = 50) => {
-    return await pb.collection('bilikku_rooms').getList(page, perPage, {
-      sort: '-created',
+    return await pb.collection("bilikku_rooms").getList(page, perPage, {
+      sort: "-created",
       filter: 'status="available"',
     });
   },
@@ -91,14 +91,14 @@ export const roomAPI = {
 // Sublet related API calls
 export const subletAPI = {
   getList: async (page = 1, perPage = 50, options = {}) => {
-    return await pb.collection('bilikku_sublets').getList(page, perPage, {
-      sort: '-created',
+    return await pb.collection("bilikku_sublets").getList(page, perPage, {
+      sort: "-created",
       ...options,
     });
   },
 
   getOne: async (id) => {
-    return await pb.collection('bilikku_sublets').getOne(id);
+    return await pb.collection("bilikku_sublets").getOne(id);
   },
 
   create: async (formData) => {
@@ -114,7 +114,7 @@ export const subletAPI = {
         dataToSend.append(key, value.toString());
       }
     });
-    return await pb.collection('bilikku_sublets').create(dataToSend);
+    return await pb.collection("bilikku_sublets").create(dataToSend);
   },
 
   update: async (id, data) => {
@@ -129,89 +129,99 @@ export const subletAPI = {
       location: data.location,
       total_occupied_rooms: data.total_occupied_rooms,
     };
-    return await pb.collection('bilikku_sublets').update(id, dataToSend);
+    return await pb.collection("bilikku_sublets").update(id, dataToSend);
   },
 
   delete: async (id) => {
-    return await pb.collection('bilikku_sublets').delete(id);
-  }
+    return await pb.collection("bilikku_sublets").delete(id);
+  },
 };
 
 // Tenant related API calls
 export const tenantAPI = {
   getList: async (page = 1, perPage = 50, options = {}) => {
-    return await pb.collection('bilikku_tenants').getList(page, perPage, {
-      sort: '-created',
+    return await pb.collection("bilikku_tenants").getList(page, perPage, {
+      sort: "-created",
       ...options,
     });
   },
 
   getOne: async (id, expand = {}) => {
-    return await pb.collection('bilikku_tenants').getOne(id, expand);
+    return await pb.collection("bilikku_tenants").getOne(id, expand);
   },
 
   create: async (data) => {
-    return await pb.collection('bilikku_tenants').create(data);
+    return await pb.collection("bilikku_tenants").create(data);
   },
 
   update: async (id, data) => {
-    return await pb.collection('bilikku_tenants').update(id, data);
+    return await pb.collection("bilikku_tenants").update(id, data);
   },
 
   delete: async (id) => {
-    return await pb.collection('bilikku_tenants').delete(id);
+    return await pb.collection("bilikku_tenants").delete(id);
   },
 
   getFirstByUserId: async (userId) => {
-    return await pb.collection('bilikku_tenants').getFirstListItem(`user_id="${userId}"`);
+    return await pb
+      .collection("bilikku_tenants")
+      .getFirstListItem(`user_id="${userId}"`);
   },
 
   getOneWithExpand: async (id) => {
-    return await pb.collection('bilikku_tenants').getOne(id, {
-      expand: 'tenant_name,room_name',
+    return await pb.collection("bilikku_tenants").getOne(id, {
+      expand: "tenant_name,room_name",
     });
   },
 
   createTenant: async (data) => {
     const formattedData = {
       ...data,
-      lease_start: data.lease_start ? new Date(data.lease_start).toISOString() : null,
+      lease_start: data.lease_start
+        ? new Date(data.lease_start).toISOString()
+        : null,
       lease_end: data.lease_end ? new Date(data.lease_end).toISOString() : null,
     };
-    return await pb.collection('bilikku_tenants').create(formattedData);
+    return await pb.collection("bilikku_tenants").create(formattedData);
   },
 
   updateTenant: async (id, data) => {
     const formattedData = {
       ...data,
-      lease_start: data.lease_start ? new Date(data.lease_start).toISOString() : null,
+      lease_start: data.lease_start
+        ? new Date(data.lease_start).toISOString()
+        : null,
       lease_end: data.lease_end ? new Date(data.lease_end).toISOString() : null,
     };
-    return await pb.collection('bilikku_tenants').update(id, formattedData);
+    return await pb.collection("bilikku_tenants").update(id, formattedData);
   },
 
   getListWithDetails: async (page = 1, perPage = 50) => {
     try {
       // Get tenants with expanded room info
-      const records = await pb.collection('bilikku_tenants').getList(page, perPage, {
-        sort: '-created',
-        expand: 'room_name',
-      });
+      const records = await pb
+        .collection("bilikku_tenants")
+        .getList(page, perPage, {
+          sort: "-created",
+          expand: "room_name",
+        });
 
       // Add usernames to each tenant
       const tenantsWithUsernames = await Promise.all(
         records.items.map(async (tenant) => {
           try {
-            const userRecord = await pb.collection('usersku').getOne(tenant.tenant_name);
+            const userRecord = await pb
+              .collection("usersku")
+              .getOne(tenant.tenant_name);
             return {
               ...tenant,
-              username: userRecord.name || userRecord.username
+              username: userRecord.name || userRecord.username,
             };
           } catch (error) {
-            console.error('Error fetching username:', error);
+            console.error("Error fetching username:", error);
             return {
               ...tenant,
-              username: 'Unknown'
+              username: "Unknown",
             };
           }
         })
@@ -228,36 +238,41 @@ export const tenantAPI = {
 export const dashboardAPI = {
   getAdminStats: async () => {
     const [rooms, tenants] = await Promise.all([
-      pb.collection('bilikku_rooms').getList(1, 50),
-      pb.collection('bilikku_tenants').getList(1, 50),
+      pb.collection("bilikku_rooms").getList(1, 50),
+      pb.collection("bilikku_tenants").getList(1, 50),
     ]);
 
     return {
       totalRooms: rooms.totalItems,
-      occupiedRooms: rooms.items.filter(room => room.status === 'occupied').length,
-      availableRooms: rooms.items.filter(room => room.status === 'available').length,
+      occupiedRooms: rooms.items.filter((room) => room.status === "occupied")
+        .length,
+      availableRooms: rooms.items.filter((room) => room.status === "available")
+        .length,
       totalTenants: tenants.totalItems,
       pendingPayments: 0,
-      monthlyRevenue: 0
+      monthlyRevenue: 0,
     };
   },
 
   getTenantStats: async (userId) => {
-    const tenant = await pb.collection('bilikku_tenants').getFirstListItem(`user_id="${userId}"`);
-    const room = await pb.collection('bilikku_rooms').getOne(tenant.room_id);
-    const payments = await pb.collection('bilikku_payments').getList(1, 10, {
+    const tenant = await pb
+      .collection("bilikku_tenants")
+      .getFirstListItem(`user_id="${userId}"`);
+    const room = await pb.collection("bilikku_rooms").getOne(tenant.room_id);
+    const payments = await pb.collection("bilikku_payments").getList(1, 10, {
       filter: `tenant_id="${tenant.id}"`,
-      sort: '-payment_date'
+      sort: "-payment_date",
     });
 
     return {
       roomNumber: room.number,
       rentDueDate: tenant.rent_due_date,
       rentAmount: tenant.rent_amount,
-      pendingPayments: payments.items.filter(p => p.status === 'pending').length,
-      lastPaymentDate: payments.items[0]?.payment_date || 'No payments yet',
+      pendingPayments: payments.items.filter((p) => p.status === "pending")
+        .length,
+      lastPaymentDate: payments.items[0]?.payment_date || "No payments yet",
     };
-  }
+  },
 };
 
 // Add other collection APIs as needed
@@ -269,19 +284,23 @@ export const otherCollectionAPI = {
 export const authAPI = {
   checkUserRole: async (userId) => {
     try {
-      const user = await pb.collection('tenant_roles').getFirstListItem(`user="${userId}"`);
+      const user = await pb
+        .collection("tenant_roles")
+        .getFirstListItem(`user="${userId}"`);
       const roleId = user.role;
-      const Role = await pb.collection('roles').getFirstListItem(`id="${roleId}"`);
+      const Role = await pb
+        .collection("roles")
+        .getFirstListItem(`id="${roleId}"`);
 
       return {
         role: Role.name,
-        tenantId: 'rb0s8fazmuf44ac'
+        tenantId: "rb0s8fazmuf44ac",
       };
     } catch (error) {
-      console.error('Error checking user role:', error);
+      console.error("Error checking user role:", error);
       return {
-        role: 'guest',
-        tenantId: 'rb0s8fazmuf44ac'
+        role: "guest",
+        tenantId: "rb0s8fazmuf44ac",
       };
     }
   },
@@ -294,30 +313,34 @@ export const authAPI = {
         return {
           id: authModel.id,
           email: authModel.email,
-          role: 'superadmin',
-          username: email.split('@')[0],
+          role: "superadmin",
+          username: email.split("@")[0],
           isAdmin: true,
           isSuperAdmin: true,
-          tenantId: 'rb0s8fazmuf44ac'
+          tenantId: "rb0s8fazmuf44ac",
         };
       }
-      throw new Error('Invalid superadmin credentials');
+      throw new Error("Invalid superadmin credentials");
     }
 
-    const authData = await pb.collection('usersku').authWithPassword(email, password);
+    const authData = await pb
+      .collection("usersku")
+      .authWithPassword(email, password);
     if (authData.record) {
-      const { role, tenantId } = await authAPI.checkUserRole(authData.record.id);
+      const { role, tenantId } = await authAPI.checkUserRole(
+        authData.record.id
+      );
       return {
         id: authData.record.id,
         email: authData.record.email,
         role: role,
         username: authData.record.username,
-        isAdmin: role === 'admin',
+        isAdmin: role === "admin",
         isSuperAdmin: false,
-        tenantId: tenantId
+        tenantId: tenantId,
       };
     }
-    throw new Error('Login failed');
+    throw new Error("Login failed");
   },
 
   register: async (email, password, name, username) => {
@@ -326,11 +349,13 @@ export const authAPI = {
       password,
       passwordConfirm: password,
       full_name: name,
-      username: username
+      username: username,
     };
 
-    const createdUser = await pb.collection('usersku').create(data);
-    const authData = await pb.collection('usersku').authWithPassword(email, password);
+    const createdUser = await pb.collection("usersku").create(data);
+    const authData = await pb
+      .collection("usersku")
+      .authWithPassword(email, password);
     return authData;
   },
 
@@ -338,7 +363,7 @@ export const authAPI = {
     pb.authStore.clear();
     superuserClient.authStore.clear();
     // Clear cookies
-    document.cookie = 'pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+    document.cookie = "pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
   },
 
   isValidSession: () => {
@@ -354,9 +379,9 @@ export const authAPI = {
         email: authModel.email,
         role: role,
         username: authModel.username,
-        isAdmin: role === 'admin',
+        isAdmin: role === "admin",
         isSuperAdmin: false,
-        tenantId: tenantId
+        tenantId: tenantId,
       };
     }
 
@@ -365,14 +390,14 @@ export const authAPI = {
       return {
         id: superAuthModel.id,
         email: superAuthModel.email,
-        role: 'superadmin',
-        username: superAuthModel.email.split('@')[0],
+        role: "superadmin",
+        username: superAuthModel.email.split("@")[0],
         isAdmin: true,
         isSuperAdmin: true,
-        tenantId: 'rb0s8fazmuf44ac'
+        tenantId: "rb0s8fazmuf44ac",
       };
     }
 
     return null;
-  }
-}; 
+  },
+};

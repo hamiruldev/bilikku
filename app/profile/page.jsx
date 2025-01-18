@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ThemeToggle } from '../../components/ThemeToggle';
 import { UserCircleIcon, CameraIcon } from '@heroicons/react/24/outline';
 import { userAPI } from '../../services/api';
+import { getUsername } from '../../lib/helpers';
 
 const initialProfile = {
   avatar_url: '',
@@ -30,8 +31,11 @@ export default function ProfilePage() {
       if (!user?.id) return;
       try {
         const record = await userAPI.getProfile(user.id);
+        const referal_name = await getUsername(pb, record.referal_code)
+
         setProfile({
           ...record,
+          referal_name,
           bank_details: record.bank_details ? JSON.parse(record.bank_details) : {
             bank_name: '',
             account_number: '',
@@ -106,9 +110,8 @@ export default function ProfilePage() {
               </div>
 
               {message && (
-                <div className={`p-4 rounded-lg ${
-                  message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'
-                }`}>
+                <div className={`p-4 rounded-lg ${message.type === 'success' ? 'bg-green-500/10 text-green-500' : 'bg-destructive/10 text-destructive'
+                  }`}>
                   {message.text}
                 </div>
               )}
@@ -145,13 +148,48 @@ export default function ProfilePage() {
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold">Basic Information</h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Kodku</label>
+                      <input
+                        disabled
+                        type="text"
+                        className="input-field"
+                        value={profile.kodku}
+                        onChange={e => setProfile({ ...profile, kodku: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">username</label>
+                      <input
+                        disabled
+                        type="text"
+                        className="input-field"
+                        value={profile.username}
+                        onChange={e => setProfile({ ...profile, username: e.target.value })}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Email</label>
+                      <input
+                        disabled
+                        type="text"
+                        className="input-field"
+                        value={profile.email}
+                        onChange={e => setProfile({ ...profile, email: e.target.value })}
+                      />
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium mb-1">Name</label>
                       <input
                         type="text"
                         className="input-field"
-                        value={profile.name}
-                        onChange={e => setProfile({ ...profile, name: e.target.value })}
+                        value={profile.full_name}
+                        onChange={e => setProfile({ ...profile, full_name: e.target.value })}
                       />
                     </div>
                     <div>
@@ -211,6 +249,26 @@ export default function ProfilePage() {
                         onChange={e => setProfile({
                           ...profile,
                           bank_details: { ...profile.bank_details, account_holder: e.target.value }
+                        })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Referal Details */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Referal Details</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">Referal Name</label>
+                      <input
+                        disabled
+                        type="text"
+                        className="input-field"
+                        value={profile.referal_name}
+                        onChange={e => setProfile({
+                          ...profile,
+                          referal_code: e.target.value
                         })}
                       />
                     </div>

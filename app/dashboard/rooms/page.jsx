@@ -16,7 +16,6 @@ import { roomAPI, subletAPI } from '../../../services/api';
 export default function RoomsPage() {
   const { user, pb } = useAuth();
   const router = useRouter();
-  const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,13 +24,43 @@ export default function RoomsPage() {
     type: "",
     sublet_id: "",
   });
+  const [rooms, setRooms] = useState([]);
   const [sublets, setSublets] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
+
+  let hasLoaded = false;
 
   useEffect(() => {
     loadRooms();
     loadSublets();
   }, []);
+
+  const loadRooms = () => {
+
+    if (hasLoaded) return;
+    hasLoaded = true;
+
+    roomAPI
+      .getList()
+      .then((records) => {
+        setLoading(false);
+
+        setRooms(records.items);
+
+        // Extract unique room types
+        const types = [...new Set(records.items.map((room) => room.type))];
+        setRoomTypes(types);
+
+        setError(null);
+
+      })
+      .catch((err) => {
+        console.error("Error loading rooms:", err);
+        setError(err.message || "Failed to load rooms");
+        setLoading(false);
+      })
+
+  };
 
   const loadSublets = async () => {
     try {
@@ -42,24 +71,6 @@ export default function RoomsPage() {
       setSublets(records.items);
     } catch (err) {
       console.error("Error loading sublets:", err);
-    }
-  };
-
-  const loadRooms = async () => {
-    try {
-      const records = await roomAPI.getList();
-      setRooms(records.items);
-      
-      // Extract unique room types
-      const types = [...new Set(records.items.map(room => room.type))];
-      setRoomTypes(types);
-      
-      setError(null);
-    } catch (err) {
-      console.error("Error loading rooms:", err);
-      setError(err.message || "Failed to load rooms");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -94,6 +105,7 @@ export default function RoomsPage() {
     return matchesSearch && matchesStatus && matchesType && matchesSublet;
   });
 
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -101,8 +113,6 @@ export default function RoomsPage() {
       </div>
     );
   }
-
-  console.log("rooms-->", rooms);
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -114,6 +124,14 @@ export default function RoomsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+
+        {error && (
+          <div className="mb-6 p-4 rounded-lg bg-destructive/10 text-destructive">
+            {error}
+          </div>
+        )}
+
+        {/* Search and Filters */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Rooms</h1>
           <Link
@@ -125,13 +143,6 @@ export default function RoomsPage() {
           </Link>
         </div>
 
-        {error && (
-          <div className="mb-6 p-4 rounded-lg bg-destructive/10 text-destructive">
-            {error}
-          </div>
-        )}
-
-        {/* Search and Filters */}
         <div className="glass-card mb-6">
           <div className="p-4">
             <div className="flex flex-col md:flex-row gap-4">
@@ -200,7 +211,16 @@ export default function RoomsPage() {
 
         {/* Rooms Grid */}
         <div className="grid gap-6">
-          {filteredRooms.map((room) => (
+
+
+
+          {!loading && filteredRooms.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No rooms found</p>
+            </div>
+          )}
+
+          {!loading && filteredRooms.length != 0 && filteredRooms.map((room) => (
             <div key={room.id} className="glass-card">
               <div className="flex justify-between items-start p-6">
                 <div>
@@ -231,10 +251,9 @@ export default function RoomsPage() {
                     <p className="text-sm text-muted-foreground">Status</p>
                     <span
                       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize
-                        ${
-                          room.status === "available"
-                            ? "bg-green-100 text-green-800"
-                            : room.status === "occupied"
+              ${room.status === "available"
+                          ? "bg-green-100 text-green-800"
+                          : room.status === "occupied"
                             ? "bg-blue-100 text-blue-800"
                             : "bg-red-100 text-red-800"
                         }`}
@@ -259,13 +278,8 @@ export default function RoomsPage() {
             </div>
           ))}
 
-          {filteredRooms.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No rooms found</p>
-            </div>
-          )}
         </div>
       </div>
-    </div>
+    </div >
   );
 }
