@@ -15,11 +15,18 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push('/dashboard');
+
+      if (localStorage.getItem("isAdmin") == 'true') {
+        router.push('/dashboard');
+      }
+
+      if (localStorage.getItem("isAdmin") == 'false') {
+        router.push('/bilikku');
+      }
     }
   }, [user, isLoading, router]);
 
-  if (isLoading) {
+  if (isLoading && localStorage.getItem("isAdmin") != null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
