@@ -30,19 +30,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      await authAPI.login(formData.email, formData.password, false).then(res => {
-        debugger
-
-        if (res.role == "admin") {
-          window.location.href = '/dashboard'
-        }
-
-        if (res.role == "guest") {
-          window.location.href = '/bilikku'
-        }
-
-      });
-
+      await authAPI.login(formData.email, formData.password, false);
 
     } catch (error) {
       console.error('Auth error:', error);

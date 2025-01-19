@@ -16,6 +16,14 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function BilikKuDashboard() {
+    // Early admin check - before any hooks or rendering
+    if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true') {
+        // window.location.href = '/dashboard';
+        return <div className="min-h-screen flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>;
+    }
+
     const { user } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();

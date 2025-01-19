@@ -14,6 +14,14 @@ import { useAuth } from '../../context/AuthContext';
 import { dashboardAPI } from '../../services/api';
 
 export default function DashboardPage() {
+  // Early guest check - before any hooks or rendering
+  if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') !== 'true') {
+    // window.location.href = '/bilikku';
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>;
+  }
+
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
   const hasLoadedRef = useRef(false);
@@ -34,33 +42,34 @@ export default function DashboardPage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [initializing, setInitializing] = useState(true);
 
+  // Check for admin access
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/login');
+    // Wait for auth to be ready
+    if (isLoading) return;
+
+    // Then check user object when it's available
+    if (!user) {
+      router.replace('/login');
+      return;
     }
+
+    setInitializing(false);
   }, [user, isLoading, router]);
 
+  // Load dashboard data
   useEffect(() => {
+    if (isLoading || !user || hasLoadedRef.current) return;
+
     let isSubscribed = true;
 
     const loadDashboardData = async () => {
-      if (!user || hasLoadedRef.current) return;
-      
       setLoading(true);
       try {
-        if (user?.isAdmin) {
-          const stats = await dashboardAPI.getAdminStats();
-          if (isSubscribed) {
-            setAdminStats(stats);
-          }
-        } else {
-          const stats = await dashboardAPI.getTenantStats(user.id);
-          if (isSubscribed) {
-            setTenantStats(stats);
-          }
-        }
+        const stats = await dashboardAPI.getAdminStats();
         if (isSubscribed) {
+          setAdminStats(stats);
           setError(null);
           hasLoadedRef.current = true;
         }
@@ -81,13 +90,19 @@ export default function DashboardPage() {
     return () => {
       isSubscribed = false;
     };
-  }, [user]);
+  }, [user, isLoading]);
 
+  // Reset hasLoaded ref when component unmounts
   useEffect(() => {
     return () => {
       hasLoadedRef.current = false;
     };
   }, []);
+
+  // Don't render anything until we know the user's role
+  if (initializing) {
+    return null;
+  }
 
   if (loading) {
     return (
@@ -116,10 +131,6 @@ export default function DashboardPage() {
     );
   }
 
-  if (!user) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen bg-background relative">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -129,101 +140,62 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-        {user.isAdmin ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <StatsCard
-                icon={<HomeIcon className="w-6 h-6" />}
-                title="Rooms"
-                stats={[
-                  { label: 'Total', value: adminStats.totalRooms },
-                  { label: 'Occupied', value: adminStats.occupiedRooms },
-                  { label: 'Available', value: adminStats.availableRooms },
-                ]}
-              />
-              <StatsCard
-                icon={<UsersIcon className="w-6 h-6" />}
-                title="Tenants"
-                stats={[
-                  { label: 'Total', value: adminStats.totalTenants },
-                  { label: 'Active', value: adminStats.occupiedRooms },
-                ]}
-              />
-              <StatsCard
-                icon={<CurrencyDollarIcon className="w-6 h-6" />}
-                title="Payments"
-                stats={[
-                  { label: 'Monthly Revenue', value: `RM ${adminStats.monthlyRevenue?.toFixed(2)}` },
-                  { label: 'Pending', value: adminStats.pendingPayments },
-                ]}
-              />
-            </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <StatsCard
+            icon={<HomeIcon className="w-6 h-6" />}
+            title="Rooms"
+            stats={[
+              { label: 'Total', value: adminStats.totalRooms },
+              { label: 'Occupied', value: adminStats.occupiedRooms },
+              { label: 'Available', value: adminStats.availableRooms },
+            ]}
+          />
+          <StatsCard
+            icon={<UsersIcon className="w-6 h-6" />}
+            title="Tenants"
+            stats={[
+              { label: 'Total', value: adminStats.totalTenants },
+              { label: 'Active', value: adminStats.occupiedRooms },
+            ]}
+          />
+          <StatsCard
+            icon={<CurrencyDollarIcon className="w-6 h-6" />}
+            title="Payments"
+            stats={[
+              { label: 'Monthly Revenue', value: `RM ${adminStats.monthlyRevenue?.toFixed(2)}` },
+              { label: 'Pending', value: adminStats.pendingPayments },
+            ]}
+          />
+        </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
 
-              <QuickActionButton
-                icon={<BuildingOfficeIcon className="w-5 h-5" />}
-                label="Add Sublet"
-                onClick={() => router.push('/dashboard/sublets/new')}
-              />
-              <QuickActionButton
-                icon={<HomeIcon className="w-5 h-5" />}
-                label="Add Room"
-                onClick={() => router.push('/dashboard/rooms/new')}
-              />
-              <QuickActionButton
-                icon={<UsersIcon className="w-5 h-5" />}
-                label="Add Tenant"
-                onClick={() => router.push('/dashboard/tenants/new')}
-              />
-              <QuickActionButton
-                icon={<CurrencyDollarIcon className="w-5 h-5" />}
-                label="Record Payment"
-                onClick={() => router.push('/dashboard/payments/new')}
-              />
-              <QuickActionButton
-                icon={<ChartBarIcon className="w-5 h-5" />}
-                label="View Reports"
-                onClick={() => router.push('/dashboard/reports')}
-              />
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <StatsCard
-                icon={<HomeIcon className="w-6 h-6" />}
-                title="Your Room"
-                stats={[
-                  { label: 'Room Number', value: tenantStats.roomNumber },
-                  { label: 'Rent Amount', value: `RM ${tenantStats.rentAmount.toFixed(2)}` },
-                  { label: 'Due Date', value: new Date(tenantStats.rentDueDate).toLocaleDateString() },
-                ]}
-              />
-              <StatsCard
-                icon={<CurrencyDollarIcon className="w-6 h-6" />}
-                title="Payments"
-                stats={[
-                  { label: 'Pending Payments', value: tenantStats.pendingPayments },
-                  { label: 'Last Payment', value: new Date(tenantStats.lastPaymentDate).toLocaleDateString() },
-                ]}
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <QuickActionButton
-                icon={<CurrencyDollarIcon className="w-5 h-5" />}
-                label="Make Payment"
-                onClick={() => router.push('/dashboard/payments/new')}
-              />
-              <QuickActionButton
-                icon={<BellIcon className="w-5 h-5" />}
-                label="Report Issue"
-                onClick={() => router.push('/dashboard/maintenance/new')}
-              />
-            </div>
-          </>
-        )}
+          <QuickActionButton
+            icon={<BuildingOfficeIcon className="w-5 h-5" />}
+            label="Add Sublet"
+            onClick={() => router.push('/dashboard/sublets/new')}
+          />
+          <QuickActionButton
+            icon={<HomeIcon className="w-5 h-5" />}
+            label="Add Room"
+            onClick={() => router.push('/dashboard/rooms/new')}
+          />
+          <QuickActionButton
+            icon={<UsersIcon className="w-5 h-5" />}
+            label="Add Tenant"
+            onClick={() => router.push('/dashboard/tenants/new')}
+          />
+          <QuickActionButton
+            icon={<CurrencyDollarIcon className="w-5 h-5" />}
+            label="Record Payment"
+            onClick={() => router.push('/dashboard/payments/new')}
+          />
+          <QuickActionButton
+            icon={<ChartBarIcon className="w-5 h-5" />}
+            label="View Reports"
+            onClick={() => router.push('/dashboard/reports')}
+          />
+        </div>
       </div>
     </div>
   );

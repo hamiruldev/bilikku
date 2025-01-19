@@ -423,24 +423,35 @@ export const authAPI = {
       throw new Error("Invalid superadmin credentials");
     }
 
-    const authData = await pb
-      .collection("usersku")
-      .authWithPassword(email, password);
-    if (authData.record) {
-      const { role, tenantId } = await authAPI.checkUserRole(
-        authData.record.id
-      );
-      return {
-        id: authData.record.id,
-        email: authData.record.email,
-        role: role,
-        username: authData.record.username,
-        isAdmin: role === "admin",
-        isSuperAdmin: false,
-        tenantId: tenantId,
-      };
+    try {
+      const authData = await pb
+        .collection("usersku")
+        .authWithPassword(email, password);
+
+      if (authData.record) {
+        const { role, tenantId } = await authAPI.checkUserRole(
+          authData.record.id
+        );
+
+        // Store user data before navigation
+        localStorage.setItem("userRole", role);
+        localStorage.setItem("isAdmin", role === "admin");
+
+        if (role == "admin") {
+          window.location.href = "/dashboard";
+        }
+
+        if (role == "guest") {
+          window.location.href = "/bilikku";
+        }
+
+        // return userData;
+      }
+      throw new Error("Login failed");
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-    throw new Error("Login failed");
   },
 
   register: async (email, password, name, username) => {
@@ -462,6 +473,8 @@ export const authAPI = {
   logout: () => {
     pb.authStore.clear();
     superuserClient.authStore.clear();
+    localStorage.removeItem("isAdmin");
+    localStorage.removeItem("userRole");
     // Clear cookies
     document.cookie = "pb_auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
   },
