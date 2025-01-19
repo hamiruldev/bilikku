@@ -34,10 +34,10 @@ export default function BilikKuDashboard() {
 
     useEffect(() => {
         const loadTenantData = async () => {
-            if (!user) {
-                router.push('/login');
-                return;
-            }
+            // if (!user) {
+            //     router.push('/login');
+            //     return;
+            // }
 
             // Ensure only guests can access this page
             if (user.role !== 'guest') {
