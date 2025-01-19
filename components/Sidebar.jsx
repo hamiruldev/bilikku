@@ -49,17 +49,32 @@ export function Sidebar({ isOpen, onClose }) {
           </div>
 
           <nav className="p-4 space-y-2">
-            <Link
-              href="/dashboard"
-              className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
-              onClick={onClose}
-            >
-              <HomeIcon className="w-5 h-5" />
-              <span>Dashboard</span>
-            </Link>
+
+            {user?.isAdmin == false && user?.role == "guest" && (
+              <>
+                <Link
+                  href="/bilikku"
+                  className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+                  onClick={onClose}>
+                  <BuildingOfficeIcon className="w-5 h-5" />
+                  <span>Bilikku</span>
+                </Link>
+              </>
+            )}
+
 
             {user?.isAdmin && (
               <>
+
+                <Link
+                  href="/dashboard"
+                  className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"
+                  onClick={onClose}
+                >
+                  <HomeIcon className="w-5 h-5" />
+                  <span>Dashboard</span>
+                </Link>
+
                 <Link
                   href="/dashboard/sublets"
                   className="flex items-center space-x-2 p-2 hover:bg-secondary/50 rounded-lg transition-colors"

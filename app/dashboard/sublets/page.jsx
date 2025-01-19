@@ -11,7 +11,13 @@ export default function SubletListPage() {
   const [sublets, setSublets] = useState();
   const [loading, setLoading] = useState(true);
 
+  let hasLoaded = false;
+
   const loadSublets = () => {
+
+    if (hasLoaded) return;
+    hasLoaded = true;
+
     setLoading(true); // Start loading before making API call
     subletAPI
       .getList()
@@ -105,11 +111,10 @@ export default function SubletListPage() {
                   <div className="grid grid-cols-3 gap-4 mt-4">
                     <div>
                       <p className="text-sm text-muted-foreground">
-                        Status Rooms
+                        Room status
                       </p>
                       <p className="font-medium">
                         {sublet.total_occupied_rooms || 0} / {sublet.total_room}{" "}
-                        left
                       </p>
                     </div>
                     <div>

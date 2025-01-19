@@ -216,10 +216,10 @@ export default function ProfilePage() {
                       <input
                         type="text"
                         className="input-field"
-                        value={profile.bank_details.bank_name}
+                        value={profile?.bank_details?.bank_name}
                         onChange={e => setProfile({
                           ...profile,
-                          bank_details: { ...profile.bank_details, bank_name: e.target.value }
+                          bank_details: { ...profile?.bank_details, bank_name: e.target.value }
                         })}
                       />
                     </div>
@@ -228,7 +228,7 @@ export default function ProfilePage() {
                       <input
                         type="text"
                         className="input-field"
-                        value={profile.bank_details.account_number}
+                        value={profile.bank_details?.account_number}
                         onChange={e => setProfile({
                           ...profile,
                           bank_details: { ...profile.bank_details, account_number: e.target.value }
@@ -240,7 +240,7 @@ export default function ProfilePage() {
                       <input
                         type="text"
                         className="input-field"
-                        value={profile.bank_details.account_holder}
+                        value={profile.bank_details?.account_holder}
                         onChange={e => setProfile({
                           ...profile,
                           bank_details: { ...profile.bank_details, account_holder: e.target.value }

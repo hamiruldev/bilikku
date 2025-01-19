@@ -137,5 +137,69 @@
     "nav": {
         "login": "Log Masuk",
         "getStarted": "Mula Sekarang"
+    },
+    "tenant": {
+        "dashboard": {
+            "title": "Sewaan Saya",
+            "currentRental": "Sewaan Semasa",
+            "room": "Bilik",
+            "leaseDetails": "Butiran Sewaan",
+            "leaseStart": "Tarikh Mula",
+            "leaseEnd": "Tarikh Tamat",
+            "deposit": "Deposit"
+        },
+        "payments": {
+            "title": "Pembayaran",
+            "currentMonth": "Bulan Semasa",
+            "status": "Status",
+            "dueDate": "Tarikh Akhir",
+            "amount": "Jumlah",
+            "paid": "Dibayar",
+            "unpaid": "Belum Dibayar",
+            "history": "Sejarah Pembayaran",
+            "rental": "Sewa",
+            "water": "Air",
+            "electric": "Elektrik",
+            "total": "Jumlah",
+            "downloadReceipt": "Muat Turun Resit"
+        },
+        "maintenance": {
+            "title": "Penyelenggaraan",
+            "reportIssue": "Lapor Isu",
+            "activeIssues": "Isu Aktif",
+            "resolvedIssues": "Isu Selesai",
+            "newReport": "Laporan Baru",
+            "issueType": "Jenis Isu",
+            "description": "Penerangan",
+            "status": "Status",
+            "reportedOn": "Dilaporkan Pada",
+            "resolved": "Selesai",
+            "pending": "Dalam Proses",
+            "inProgress": "Sedang Diproses"
+        },
+        "cleaning": {
+            "title": "Jadual Pembersihan",
+            "nextDuty": "Tugas Seterusnya",
+            "schedule": "Jadual",
+            "member": "Ahli",
+            "date": "Tarikh",
+            "area": "Kawasan",
+            "markComplete": "Tanda Selesai",
+            "completed": "Selesai",
+            "upcoming": "Akan Datang"
+        },
+        "feedback": {
+            "title": "Maklum Balas & Aduan",
+            "newFeedback": "Maklum Balas Baru",
+            "type": "Jenis",
+            "message": "Mesej",
+            "submit": "Hantar",
+            "history": "Sejarah",
+            "types": {
+                "general": "Maklum Balas Am",
+                "complaint": "Aduan",
+                "suggestion": "Cadangan"
+            }
+        }
     }
 }

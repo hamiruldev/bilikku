@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { userAPI } from '../../services/api';
+import { authAPI, userAPI } from '../../services/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
@@ -30,8 +30,20 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      await userAPI.login(formData.email, formData.password);
-      router.push('/dashboard');
+      await authAPI.login(formData.email, formData.password, false).then(res => {
+        debugger
+
+        if (res.role == "admin") {
+          window.location.href = '/dashboard'
+        }
+
+        if (res.role == "guest") {
+          window.location.href = '/bilikku'
+        }
+
+      });
+
+
     } catch (error) {
       console.error('Auth error:', error);
       setError(error?.data?.message || error?.message || 'Failed to login');
@@ -48,7 +60,7 @@ export default function LoginPage() {
       </div>
 
       <div className="w-full max-w-md">
-        <div className="glass-panel space-y-6">
+        <div className="glass-card space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-bold">Welcome Back</h1>
             <p className="text-muted-foreground mt-2">Sign in to your account</p>
@@ -65,6 +77,7 @@ export default function LoginPage() {
               <label className="block text-sm font-medium mb-1">Email</label>
               <input
                 type="email"
+                autoComplete="email"
                 className="input-field"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}

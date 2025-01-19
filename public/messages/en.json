@@ -137,5 +137,69 @@
     "nav": {
         "login": "Login",
         "getStarted": "Get Started"
+    },
+    "tenant": {
+        "dashboard": {
+            "title": "My Rental",
+            "currentRental": "Current Rental",
+            "room": "Room",
+            "leaseDetails": "Lease Details",
+            "leaseStart": "Lease Start",
+            "leaseEnd": "Lease End",
+            "deposit": "Deposit"
+        },
+        "payments": {
+            "title": "Payments",
+            "currentMonth": "Current Month",
+            "status": "Status",
+            "dueDate": "Due Date",
+            "amount": "Amount",
+            "paid": "Paid",
+            "unpaid": "Unpaid",
+            "history": "Payment History",
+            "rental": "Rental",
+            "water": "Water",
+            "electric": "Electric",
+            "total": "Total",
+            "downloadReceipt": "Download Receipt"
+        },
+        "maintenance": {
+            "title": "Maintenance",
+            "reportIssue": "Report Issue",
+            "activeIssues": "Active Issues",
+            "resolvedIssues": "Resolved Issues",
+            "newReport": "New Report",
+            "issueType": "Issue Type",
+            "description": "Description",
+            "status": "Status",
+            "reportedOn": "Reported On",
+            "resolved": "Resolved",
+            "pending": "Pending",
+            "inProgress": "In Progress"
+        },
+        "cleaning": {
+            "title": "Cleaning Schedule",
+            "nextDuty": "Your Next Duty",
+            "schedule": "Schedule",
+            "member": "Member",
+            "date": "Date",
+            "area": "Area",
+            "markComplete": "Mark as Complete",
+            "completed": "Completed",
+            "upcoming": "Upcoming"
+        },
+        "feedback": {
+            "title": "Feedback & Complaints",
+            "newFeedback": "New Feedback",
+            "type": "Type",
+            "message": "Message",
+            "submit": "Submit",
+            "history": "History",
+            "types": {
+                "general": "General Feedback",
+                "complaint": "Complaint",
+                "suggestion": "Suggestion"
+            }
+        }
     }
 }

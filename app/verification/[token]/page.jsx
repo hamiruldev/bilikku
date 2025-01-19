@@ -51,7 +51,7 @@ export default function VerificationPage() {
       </div>
 
       <div className="max-w-md w-full">
-        <div className="glass-panel text-center space-y-6">
+        <div className="glass-card text-center space-y-6">
           {status === 'verifying' && (
             <div className="space-y-4">
               <div className="w-16 h-16 rounded-full border-4 border-primary/20 border-t-primary animate-spin mx-auto" />

@@ -134,6 +134,37 @@ export default function SubletFormPage({ params }) {
 
                   <div>
                     <label className="block text-sm font-medium mb-1">
+                      Rental price per month
+                    </label>
+                    <input
+                      type="text"
+                      className="input-field"
+                      value={formData.rental_price_per_month}
+                      onChange={(e) =>
+                        setFormData({ ...formData, rental_price_per_month: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
+                      Deposit Amount
+                    </label>
+                    <input
+                      type="text"
+                      className="input-field"
+                      value={formData.deposit_amount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, deposit_amount: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-1">
                       Status
                     </label>
                     <select
@@ -163,7 +194,7 @@ export default function SubletFormPage({ params }) {
                     onChange={(e) =>
                       setFormData({ ...formData, address: e.target.value })
                     }
-                    required
+                  // required
                   />
                 </div>
 
@@ -206,7 +237,16 @@ export default function SubletFormPage({ params }) {
                     />
                   </div>
                 </div>
+
+                {/* Save Button */}
+                <button
+                  type="submit"
+                  className="btn-primary w-auto py-2 px-4 rounded text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                >
+                  {isEditing ? "Save Changes" : "Create Sublet"}
+                </button>
               </form>
+
             </div>
           </div>
         </div>

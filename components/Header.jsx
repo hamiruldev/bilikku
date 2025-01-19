@@ -9,18 +9,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user } = useAuth();
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 h-16 glass z-40 border-b border-glass-border">
+      <header className="glass-header fixed top-0 left-0 right-0 h-16 glass z-40 border-b border-glass-border">
         <div className="h-full container mx-auto px-4 flex items-center justify-between">
-          <Link 
-            href="/dashboard" 
+          <Link
+            href="/dashboard"
             className="text-xl md:text-2xl font-bold flex items-center space-x-2"
           >
-            <span className="hidden sm:inline">BilikKu</span>
-            <span className="sm:hidden">BK</span>
+            <span className="hidden sm:inline text-2xl font-bold text-primary">BilikKu</span>
+            <span className="sm:hidden text-2xl font-bold text-primary">BK</span>
+
+
           </Link>
 
           <div className="flex items-center space-x-4">

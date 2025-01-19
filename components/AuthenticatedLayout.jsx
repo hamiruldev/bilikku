@@ -2,17 +2,15 @@
 
 import { Header } from '../components/Header';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { LoadingSpinner } from '../components/LoadingSpinner';
-import { usePathname, useRouter } from 'next/navigation';
-import { PUBLIC_ROUTES } from '../lib/constants';
+import { usePathname } from 'next/navigation';
+import { AUTHENTICATED_ROUTES, PUBLIC_ROUTES } from '../lib/constants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export function AuthenticatedLayout({ children }) {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
   // Handle hydration
@@ -20,37 +18,24 @@ export function AuthenticatedLayout({ children }) {
     setIsMounted(true);
   }, []);
 
-  // Handle authentication
-  useEffect(() => {
-    if (!isLoading && !user && !PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
-      router.push('/');
-    }
-  }, [user, isLoading, pathname, router]);
-
-  // Don't show header for public routes or when user is not authenticated
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
-
-  // Show header only for authenticated users on non-public routes
-  const showHeader = user && !isPublicRoute;
-
-  // If still loading auth state or not mounted, show loading spinner
   if (!isMounted) {
-    return null; // Prevent hydration mismatch
+    return null;
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  // Header visibility logic
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route));
+  const isAuthRoute = AUTHENTICATED_ROUTES.some(route => pathname.startsWith(route));
+
+  const showHeader = user && (
+    (user.role === 'admin') ||
+    (user.role === 'guest')
+  );
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <AnimatePresence>
-        {showHeader && (
+        {showHeader && isAuthRoute && (
           <motion.div
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -63,14 +48,12 @@ export function AuthenticatedLayout({ children }) {
       </AnimatePresence>
 
       {/* Main Content */}
-      <main 
-        className={`transition-all duration-300 ${showHeader ? "pt-16" : ""}`}
-      >
+      <main className={`transition-all duration-300 ${showHeader ? "pt-16" : ""}`}>
         <div className={`container mx-auto px-4 sm:px-6 lg:px-8 ${showHeader ? "py-8" : ""}`}>
-          {/* Breadcrumb (only show on authenticated routes) */}
-          {showHeader && <Breadcrumb />}
+          {/* Breadcrumb */}
+          {showHeader && isAuthRoute && <Breadcrumb />}
 
-          {/* Page Content with Animation */}
+          {/* Page Content */}
           <AnimatePresence mode="wait">
             <motion.div
               key={pathname}
@@ -84,11 +67,6 @@ export function AuthenticatedLayout({ children }) {
           </AnimatePresence>
         </div>
       </main>
-
-      {/* Mobile Navigation Drawer Overlay */}
-      <div className="lg:hidden">
-        {/* Mobile menu implementation will go here */}
-      </div>
     </div>
   );
 } 

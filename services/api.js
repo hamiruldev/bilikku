@@ -5,9 +5,9 @@ import { superuserClient } from "../lib/superuserClient";
 // User related API calls
 export const userAPI = {
   // Authentication
-  login: async (email, password) => {
-    return await pb.collection("usersku").authWithPassword(email, password);
-  },
+  //   login: async (email, password) => {
+  //     return await pb.collection("usersku").authWithPassword(email, password);
+  //   },
 
   register: async (userData) => {
     return await pb.collection("usersku").create(userData);
@@ -291,6 +291,45 @@ export const tenantAPI = {
       throw error;
     }
   },
+
+  getCurrentMonthPayments: async (tenantId) => {
+    const currentDate = new Date();
+    const startOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      1
+    ).toISOString();
+    const endOfMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    ).toISOString();
+
+    try {
+      const result = await pb.collection("bilikku_payments").getFirstListItem(`
+        tenant_id = "${tenantId}" && 
+        created >= "${startOfMonth}" && 
+        created <= "${endOfMonth}"
+      `);
+      return result;
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      return null;
+    }
+  },
+
+  getActiveIssues: async (tenantId) => {
+    try {
+      const result = await pb.collection("bilikku_maintenance").getList(1, 50, {
+        filter: `tenant_id = "${tenantId}" && status != "resolved"`,
+        sort: "-created",
+      });
+      return result.items;
+    } catch (error) {
+      console.error("Error fetching issues:", error);
+      return [];
+    }
+  },
 };
 
 // Dashboard related API calls
@@ -343,20 +382,22 @@ export const otherCollectionAPI = {
 export const authAPI = {
   checkUserRole: async (userId) => {
     try {
-      const user = await pb
+      const roleRecord = await pb
         .collection("tenant_roles")
         .getFirstListItem(`user="${userId}"`);
-      const roleId = user.role;
-      const Role = await pb
+
+      const roleId = roleRecord.role;
+      const roleDetails = await pb
         .collection("roles")
         .getFirstListItem(`id="${roleId}"`);
 
       return {
-        role: Role.name,
+        role: roleDetails.name,
         tenantId: "rb0s8fazmuf44ac",
       };
     } catch (error) {
       console.error("Error checking user role:", error);
+      // Return guest role if role check fails
       return {
         role: "guest",
         tenantId: "rb0s8fazmuf44ac",

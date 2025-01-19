@@ -321,7 +321,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8">
+      <div className="glass-card max-w-md w-full space-y-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold">{t('auth.register')}</h2>
           <p className="mt-2 text-muted-foreground">
@@ -411,7 +411,7 @@ export default function RegisterPage() {
                   id="email"
                   name="email"
                   type="email"
-                  // autoComplete='email'
+                  autoComplete="email"
                   required
                   className={`input-field ${validationErrors.email
                     ? 'border-destructive'

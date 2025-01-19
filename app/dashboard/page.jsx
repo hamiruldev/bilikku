@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   HomeIcon,
@@ -14,8 +14,9 @@ import { useAuth } from '../../context/AuthContext';
 import { dashboardAPI } from '../../services/api';
 
 export default function DashboardPage() {
-  const { user, logout, isLoading, pb } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+  const hasLoadedRef = useRef(false);
   const [adminStats, setAdminStats] = useState({
     totalRooms: 0,
     occupiedRooms: 0,
@@ -44,6 +45,9 @@ export default function DashboardPage() {
     let isSubscribed = true;
 
     const loadDashboardData = async () => {
+      if (!user || hasLoadedRef.current) return;
+      
+      setLoading(true);
       try {
         if (user?.isAdmin) {
           const stats = await dashboardAPI.getAdminStats();
@@ -56,10 +60,15 @@ export default function DashboardPage() {
             setTenantStats(stats);
           }
         }
-        setError(null);
+        if (isSubscribed) {
+          setError(null);
+          hasLoadedRef.current = true;
+        }
       } catch (error) {
         console.error('Error loading dashboard data:', error);
-        setError(error?.message || 'Failed to load dashboard data');
+        if (isSubscribed) {
+          setError(error?.message || 'Failed to load dashboard data');
+        }
       } finally {
         if (isSubscribed) {
           setLoading(false);
@@ -67,14 +76,18 @@ export default function DashboardPage() {
       }
     };
 
-    if (user) {
-      loadDashboardData();
-    }
+    loadDashboardData();
 
     return () => {
       isSubscribed = false;
     };
   }, [user]);
+
+  useEffect(() => {
+    return () => {
+      hasLoadedRef.current = false;
+    };
+  }, []);
 
   if (loading) {
     return (

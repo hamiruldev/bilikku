@@ -81,7 +81,7 @@ export default function ForgotPasswordPage() {
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-accent/20 rounded-full blur-3xl" />
       </div>
 
-      <div className="w-full max-w-md">
+      <div className="glass-card w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-4">
