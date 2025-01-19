@@ -15,7 +15,7 @@ import { dashboardAPI } from '../../services/api';
 
 export default function DashboardPage() {
   // Early guest check - before any hooks or rendering
-  if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') !== 'true') {
+  if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
     // window.location.href = '/bilikku';
     return <div className="min-h-screen flex items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

@@ -30,8 +30,12 @@ export const AuthProvider = ({ children }) => {
         const currentUser = await authAPI.getCurrentUser();
         setUser(currentUser);
 
-        if (window.location.pathname == '/login') {
-          router.push('/dashboard/');
+        if (window.location.pathname == '/login' && localStorage.getItem('isAdmin') != null && localStorage.getItem('isAdmin') === "true") {
+          router.replace('/dashboard/');
+        }
+
+        if (window.location.pathname == '/login' && localStorage.getItem('isAdmin') != null && localStorage.getItem('isAdmin') === "false") {
+          router.replace('/bilikku/');
         }
 
       } catch (error) {

@@ -17,7 +17,7 @@ import { useRouter } from 'next/navigation';
 
 export default function BilikKuDashboard() {
     // Early admin check - before any hooks or rendering
-    if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') === 'true') {
+    if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
         // window.location.href = '/dashboard';
         return <div className="min-h-screen flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

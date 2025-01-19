@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useLanguage } from '../../../context/LanguageContext';
-import { tenantAPI, paymentAPI } from '../../../services/api';
-import { 
-    HomeIcon, 
-    CurrencyDollarIcon, 
-    WrenchIcon, 
+import {
+    HomeIcon,
+    CurrencyDollarIcon,
+    WrenchIcon,
     ClipboardIcon,
-    ChatBubbleLeftIcon 
+    ChatBubbleLeftIcon
 } from '@heroicons/react/24/outline';
+import { tenantAPI, paymentAPI } from '../../../services/api';
 
 export default function TenantDashboard() {
     const { user } = useAuth();
@@ -29,16 +29,16 @@ export default function TenantDashboard() {
                 setTenantData(tenant);
 
                 // Load current month payments
-                const payments = await paymentAPI.getCurrentMonthPayments(tenant.id);
+                const payments = await tenantAPI.getCurrentMonthPayments(tenant.id);
                 setCurrentPayments(payments);
 
                 // Load active maintenance issues
-                const issues = await maintenanceAPI.getActiveIssues(tenant.id);
+                const issues = await tenantAPI.getActiveIssues(tenant.id);
                 setActiveIssues(issues);
 
                 // Load cleaning schedule
-                const schedule = await cleaningAPI.getSchedule(tenant.id);
-                setCleaningSchedule(schedule);
+                // const schedule = await tenantAPI.getSchedule(tenant.id);
+                // setCleaningSchedule(schedule);
             } catch (error) {
                 console.error('Error loading tenant data:', error);
             } finally {
@@ -83,13 +83,12 @@ export default function TenantDashboard() {
                         <p><span className="font-medium">{t('tenant.payments.electric')}:</span> RM {currentPayments?.electric_bill}</p>
                         <p className="text-lg font-bold mt-4">
                             {t('tenant.payments.total')}: RM {currentPayments?.total_amount}
-                            <span className={`ml-2 px-2 py-1 rounded text-sm ${
-                                currentPayments?.status === 'paid' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : 'bg-red-100 text-red-800'
-                            }`}>
-                                {currentPayments?.status === 'paid' 
-                                    ? t('tenant.payments.paid') 
+                            <span className={`ml-2 px-2 py-1 rounded text-sm ${currentPayments?.status === 'paid'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                                }`}>
+                                {currentPayments?.status === 'paid'
+                                    ? t('tenant.payments.paid')
                                     : t('tenant.payments.unpaid')}
                             </span>
                         </p>
@@ -135,15 +134,15 @@ export default function TenantDashboard() {
 
             {/* Quick Actions */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <button 
+                <button
                     onClick={() => router.push('/dashboard/tenant/report')}
                     className="btn-secondary flex items-center justify-center gap-2"
                 >
                     <WrenchIcon className="h-5 w-5" />
                     {t('tenant.maintenance.reportIssue')}
                 </button>
-                
-                <button 
+
+                <button
                     onClick={() => router.push('/dashboard/tenant/payments')}
                     className="btn-secondary flex items-center justify-center gap-2"
                 >
@@ -151,7 +150,7 @@ export default function TenantDashboard() {
                     {t('tenant.payments.history')}
                 </button>
 
-                <button 
+                <button
                     onClick={() => router.push('/dashboard/tenant/feedback')}
                     className="btn-secondary flex items-center justify-center gap-2"
                 >
