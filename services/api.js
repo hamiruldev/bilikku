@@ -406,22 +406,22 @@ export const authAPI = {
   },
 
   login: async (email, password, isSuperAdmin = false) => {
-    if (isSuperAdmin) {
-      const isAuthenticated = await authenticateSuperuser(email, password);
-      if (isAuthenticated && superuserClient.authStore.model) {
-        const authModel = superuserClient.authStore.model;
-        return {
-          id: authModel.id,
-          email: authModel.email,
-          role: "superadmin",
-          username: email.split("@")[0],
-          isAdmin: true,
-          isSuperAdmin: true,
-          tenantId: "rb0s8fazmuf44ac",
-        };
-      }
-      throw new Error("Invalid superadmin credentials");
-    }
+    // if (isSuperAdmin) {
+    //   const isAuthenticated = await authenticateSuperuser(email, password);
+    //   if (isAuthenticated && superuserClient.authStore.model) {
+    //     const authModel = superuserClient.authStore.model;
+    //     return {
+    //       id: authModel.id,
+    //       email: authModel.email,
+    //       role: "superadmin",
+    //       username: email.split("@")[0],
+    //       isAdmin: true,
+    //       isSuperAdmin: true,
+    //       tenantId: "rb0s8fazmuf44ac",
+    //     };
+    //   }
+    //   throw new Error("Invalid superadmin credentials");
+    // }
 
     try {
       const authData = await pb
@@ -447,7 +447,6 @@ export const authAPI = {
 
         // return userData;
       }
-      throw new Error("Login failed");
     } catch (error) {
       console.error("Login error:", error);
       throw error;

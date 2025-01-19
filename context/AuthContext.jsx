@@ -55,7 +55,10 @@ export const AuthProvider = ({ children }) => {
       initializeAuth();
     });
 
-    initializeAuth();
+    if (localStorage.getItem("isAdmin") != null) {
+      initializeAuth();
+    }
+
 
     // Cleanup
     return () => {
