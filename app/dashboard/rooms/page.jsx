@@ -24,8 +24,8 @@ export default function RoomsPage() {
     type: "",
     sublet_id: "",
   });
-  const [rooms, setRooms] = useState([]);
   const [sublets, setSublets] = useState([]);
+  const [rooms, setRooms] = useState([]);
   const [roomTypes, setRoomTypes] = useState([]);
 
   let hasLoaded = false;
@@ -68,7 +68,14 @@ export default function RoomsPage() {
         sort: "name",
         fields: "id,name",
       });
-      setSublets(records.items);
+
+      const renamedData = records.items.map(({ id, ...rest }) => ({
+        sublet_id: id,
+        ...rest
+      }));
+
+
+      setSublets(renamedData);
     } catch (err) {
       console.error("Error loading sublets:", err);
     }
@@ -97,13 +104,16 @@ export default function RoomsPage() {
 
     const matchesStatus =
       !filters.status || room.status === filters.status;
+
     const matchesType =
       !filters.type || room.type === filters.type;
+
     const matchesSublet =
-      !filters.sublet_id || room.sublet_id === filters.sublet_id;
+      !filters.sublet_id || room.house === filters.sublet_id;
 
     return matchesSearch && matchesStatus && matchesType && matchesSublet;
   });
+
 
 
   if (loading) {
@@ -199,7 +209,7 @@ export default function RoomsPage() {
                 >
                   <option value="">All Sublets</option>
                   {sublets.map((sublet) => (
-                    <option key={sublet.id} value={sublet.id}>
+                    <option key={sublet.sublet_id} value={sublet.sublet_id}>
                       {sublet.name}
                     </option>
                   ))}
