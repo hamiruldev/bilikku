@@ -20,6 +20,8 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  let hasLoaded = false;
+
   // Initialize auth state
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -55,8 +57,13 @@ export const AuthProvider = ({ children }) => {
       initializeAuth();
     });
 
+    if (hasLoaded) {
+      return;
+    }
+
     if (localStorage.getItem("isAdmin") != null) {
       initializeAuth();
+      hasLoaded = true;
     }
 
 

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useLanguage } from '../../context/LanguageContext';
-import { tenantAPI } from '../../services/api';
+import { roomAPI, tenantAPI } from '../../services/api';
 import {
     HomeIcon,
     CurrencyDollarIcon,
@@ -16,14 +16,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function BilikKuDashboard() {
-    // Early admin check - before any hooks or rendering
-    if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
-        // window.location.href = '/dashboard';
-        return <div className="min-h-screen flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>;
-    }
-
     const { user } = useAuth();
     const router = useRouter();
     const { t } = useLanguage();
@@ -32,44 +24,66 @@ export default function BilikKuDashboard() {
     const [activeIssues, setActiveIssues] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const loadTenantData = async () => {
-            // if (!user) {
-            //     router.push('/login');
-            //     return;
-            // }
+    let hasLoaded = false
 
-            // Ensure only guests can access this page
-            if (user.role !== 'guest') {
+    const loadTenantData = async () => {
+        // if (!user) {
+        //     router.push('/login');
+        //     return;
+        // }
+
+        // Ensure only guests can access this page
+        // if (user?.role !== 'guest') {
+        //     router.push('/dashboard');
+        //     return;
+        // }
+
+        try {
+            // Load tenant details
+            const tenant = await tenantAPI.getFirstByUserId(user.id);
+            if (!tenant) {
                 router.push('/dashboard');
                 return;
             }
 
-            try {
-                // Load tenant details
-                const tenant = await tenantAPI.getFirstByUserId(user.id);
-                if (!tenant) {
-                    router.push('/dashboard');
-                    return;
-                }
-                setTenantData(tenant);
+            const roomDetails = await roomAPI.getOne(tenant.room_name);
 
-                // Load current month payments
-                const payments = await tenantAPI.getCurrentMonthPayments(tenant.id);
-                setCurrentPayments(payments);
+            tenant.room_name = roomDetails.name
 
-                // Load active maintenance issues
-                const issues = await tenantAPI.getActiveIssues(tenant.id);
-                setActiveIssues(issues);
+            setTenantData(tenant);
 
-            } catch (error) {
-                console.error('Error loading tenant data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
+            // Load current month payments
+            const payments = await tenantAPI.getCurrentMonthPayments(tenant.id);
 
-        loadTenantData();
+            setCurrentPayments(payments);
+
+            // Load active maintenance issues
+            const issues = await tenantAPI.getActiveIssues(tenant.id);
+            setActiveIssues(issues);
+
+        } catch (error) {
+            console.error('Error loading tenant data:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+
+        if (hasLoaded) {
+            return;
+        }
+
+        if (user && user.role !== 'guest') {
+            router.push('/dashboard');
+            return;
+        }
+
+        if (user) {
+            loadTenantData();
+            hasLoaded = true;
+        }
+
     }, [user, router]);
 
     if (loading) {
@@ -130,16 +144,16 @@ export default function BilikKuDashboard() {
                             <h2 className="text-lg font-semibold">{t('tenant.payments.currentMonth')}</h2>
                         </div>
                         <div className="space-y-2">
-                            <p><span className="font-medium">{t('tenant.payments.rental')}:</span> RM {currentPayments?.rental_amount}</p>
+                            <p><span className="font-medium">{t('tenant.payments.rental')}:</span> RM {currentPayments?.amount}</p>
                             <p><span className="font-medium">{t('tenant.payments.water')}:</span> RM {currentPayments?.water_bill}</p>
                             <p><span className="font-medium">{t('tenant.payments.electric')}:</span> RM {currentPayments?.electric_bill}</p>
-                            <p className="text-lg font-bold mt-4">
-                                {t('tenant.payments.total')}: RM {currentPayments?.total_amount}
-                                <span className={`ml-2 px-2 py-1 rounded text-sm ${currentPayments?.status === 'paid'
+                            <p className="text-lg font-bold mt-4 text-right">
+                                {t('tenant.payments.total')}: RM {currentPayments?.amount}
+                                <span className={`ml-2 px-2 py-1 rounded text-sm ${currentPayments?.status === "completed"
                                     ? 'bg-green-100 text-green-800'
                                     : 'bg-red-100 text-red-800'
                                     }`}>
-                                    {currentPayments?.status === 'paid'
+                                    {currentPayments?.status === "completed"
                                         ? t('tenant.payments.paid')
                                         : t('tenant.payments.unpaid')}
                                 </span>
@@ -197,4 +211,4 @@ export default function BilikKuDashboard() {
             </main>
         </div>
     );
-} 
+}

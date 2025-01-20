@@ -29,9 +29,20 @@ export default function TenantFormPage({ params }) {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const dropdownRef = useRef(null);
 
+
+    let hasLoaded = false;
+
     useEffect(() => {
+
+
+        if (hasLoaded) {
+            return;
+        }
         loadUsers();
         loadRooms();
+
+        hasLoaded = true;
+
     }, []);
 
     useEffect(() => {

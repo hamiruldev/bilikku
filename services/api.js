@@ -224,7 +224,7 @@ export const tenantAPI = {
   getFirstByUserId: async (userId) => {
     return await pb
       .collection("bilikku_tenants")
-      .getFirstListItem(`user_id="${userId}"`);
+      .getFirstListItem(`tenant_name="${userId}"`);
   },
 
   getOneWithExpand: async (id) => {
@@ -307,7 +307,7 @@ export const tenantAPI = {
 
     try {
       const result = await pb.collection("bilikku_payments").getFirstListItem(`
-        tenant_id = "${tenantId}" && 
+        tenant_name = "${tenantId}" && 
         created >= "${startOfMonth}" && 
         created <= "${endOfMonth}"
       `);

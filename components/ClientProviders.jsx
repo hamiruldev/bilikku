@@ -6,7 +6,9 @@ import { ThemeProvider } from './ThemeProvider';
 import { Header } from './Header';
 import { LayoutContent } from './LayoutContent';
 
-export function ClientProviders({ children }: { children: React.ReactNode }) {
+export function ClientProviders({ children }) {
+  debugger
+  
   return (
     <AuthProvider>
       <ThemeProvider>

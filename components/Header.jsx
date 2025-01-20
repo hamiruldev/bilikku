@@ -6,6 +6,7 @@ import { Sidebar } from './Sidebar';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { authGuard } from '../lib/helpers';
 
 export function Header() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

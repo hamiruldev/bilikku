@@ -12,15 +12,19 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
 import { dashboardAPI } from '../../services/api';
+import { authGuard } from '../../lib/helpers';
 
 export default function DashboardPage() {
   // Early guest check - before any hooks or rendering
-  if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
-    // window.location.href = '/bilikku';
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-    </div>;
-  }
+  // if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
+  //   // window.location.href = '/bilikku';
+  //   return <div className="min-h-screen flex items-center justify-center">
+  //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+  //   </div>;
+  // }
+
+  authGuard()
+
 
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
@@ -43,6 +47,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [initializing, setInitializing] = useState(true);
+
+  // let hasLoaded = false;
 
   // Check for admin access
   useEffect(() => {
@@ -85,7 +91,12 @@ export default function DashboardPage() {
       }
     };
 
+    // if (hasLoaded) {
+    //   return;
+    // }
+
     loadDashboardData();
+    // hasLoaded = true;
 
     return () => {
       isSubscribed = false;

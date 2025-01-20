@@ -139,9 +139,8 @@ export default function RoomForm({ params }) {
     }
   };
 
-
-  console.log("sublets", sublets)
-  console.log("formData", formData)
+  // console.log("sublets", sublets)
+  // console.log("formData", formData)
 
   return (
     <div className="min-h-screen bg-background relative">
