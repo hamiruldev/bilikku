@@ -10,19 +10,6 @@ import { useAuth } from '../context/AuthContext';
 
 export function AuthenticatedLayout({ children }) {
 
-
-  // Early admin check - before any hooks or rendering
-  // if (typeof window !== 'undefined' && localStorage.getItem('isAdmin') == null) {
-  //   // window.location.href = '/dashboard';
-  //   return <div className="min-h-screen flex items-center justify-center">
-  //     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  //   </div>;
-  // }
-
-  // if (typeof window !== 'undefined' && localStorage.getItem('userRole') == "guest") {
-  //   window.location.href = '/bilikku';
-  // }
-
   const { user } = useAuth();
   const pathname = usePathname();
   const [isMounted, setIsMounted] = useState(false);
@@ -45,11 +32,14 @@ export function AuthenticatedLayout({ children }) {
     (user.role === 'guest')
   );
 
+
+  console.log("user", user)
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <AnimatePresence>
-        {showHeader && isAuthRoute && (
+        {user && isAuthRoute && (
           <motion.div
             initial={{ y: -100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}

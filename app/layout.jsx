@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthenticatedLayout } from '../components/AuthenticatedLayout';
 import { AuthProvider } from "../context/AuthContext";
+import { AuthGuard } from "../context/AuthGuard";
 import { LanguageProvider } from '../context/LanguageContext';
 
 const inter = Inter({
@@ -27,9 +28,11 @@ export default function RootLayout({ children }) {
         >
           <AuthProvider>
             <LanguageProvider>
-              <AuthenticatedLayout>
-                {children}
-              </AuthenticatedLayout>
+              <AuthGuard>
+                <AuthenticatedLayout>
+                  {children}
+                </AuthenticatedLayout>
+              </AuthGuard>
             </LanguageProvider>
           </AuthProvider>
         </ThemeProvider>
