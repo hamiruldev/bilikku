@@ -1,58 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { subletAPI } from "../../../services/api";
+import { useSublets, useDeleteSublet } from "../../../hooks/useQueries";
 
 export default function SubletListPage() {
-  const router = useRouter();
-  const [sublets, setSublets] = useState();
-  const [loading, setLoading] = useState(true);
+  const { data: sublets = [], isLoading, error } = useSublets();
+  const deleteSublet = useDeleteSublet();
 
-  let hasLoaded = false;
-
-  const loadSublets = () => {
-
-    if (hasLoaded) return;
-    hasLoaded = true;
-
-    setLoading(true); // Start loading before making API call
-    subletAPI
-      .getList()
-      .then((records) => {
-        setSublets(records.items);
-        setLoading(true);
-      })
-      .catch((error) => {
-        console.error("Error loading sublets:", error);
-        setLoading(true);
-      })
-  };
-
-  useEffect(() => {
-    loadSublets();
-  }, []);
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this sublet?")) return;
 
-    setLoading(true); // Show loading while deleting
-
-    subletAPI
-      .delete(id)
-      .then(() => {
-        loadSublets()
-        setLoading(false)
-      }
-      ) // Refresh the list after deletion
-      .catch((error) => {
-        setLoading(false);
-        console.error("Error deleting sublet:", error);
-        alert("Failed to delete sublet. Please try again.");
-      });
+    try {
+      await deleteSublet.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting sublet:", error);
+      alert("Failed to delete sublet. Please try again.");
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-destructive">Error: {error.message}</div>
+      </div>
+    );
+  }
+
+  console.log("sublets", sublets)
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -76,79 +59,67 @@ export default function SubletListPage() {
         </div>
 
         <div className="grid gap-6">
-          {/* Show spinner if loading */}
-          {loading && !sublets ? (
-            <div className="min-h-screen flex items-center justify-center">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          {sublets.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No sublets found</p>
             </div>
           ) : (
-            <>
-              {sublets.map((sublet) => (
-                <div key={sublet.id} className="glass-card">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-xl font-semibold">{sublet.name}</h3>
-                      <p className="text-muted-foreground mt-1">
-                        {sublet.address}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/dashboard/sublets/edit/${sublet.id}`}
-                        className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
-                      >
-                        <PencilIcon className="w-5 h-5" />
-                      </Link>
-                      <button
-                        onClick={() => handleDelete(sublet.id)}
-                        className="p-2 hover:bg-destructive/10 text-destructive rounded-full transition-colors"
-                      >
-                        <TrashIcon className="w-5 h-5" />
-                      </button>
-                    </div>
+            sublets.items.map((sublet) => (
+              <div key={sublet.id} className="glass-card">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-semibold">{sublet.name}</h3>
+                    <p className="text-muted-foreground mt-1">
+                      {sublet.address}
+                    </p>
                   </div>
-
-                  <div className="grid grid-cols-3 gap-4 mt-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Room status
-                      </p>
-                      <p className="font-medium">
-                        {sublet.total_occupied_rooms || 0} / {sublet.total_room}{" "}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        Monthly Rental
-                      </p>
-                      <p className="font-medium">
-                        RM {sublet.rental_price_per_month?.toFixed(2)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Status</p>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${sublet.status === "available"
-                          ? "bg-green-100 text-green-800"
-                          : sublet.status === "half occupied"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                          }`}
-                      >
-                        {sublet.status}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/dashboard/sublets/edit/${sublet.id}`}
+                      className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
+                    >
+                      <PencilIcon className="w-5 h-5" />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(sublet.id)}
+                      className="p-2 hover:bg-destructive/10 text-destructive rounded-full transition-colors"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
                   </div>
                 </div>
-              ))}
 
-              {/* Show message if no sublets */}
-              {!loading && sublets.length === 0 && (
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">No sublets found</p>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Room status</p>
+                    <p className="font-medium">
+                      {sublet.total_occupied_rooms || 0} / {sublet.total_room}{" "}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Monthly Rental
+                    </p>
+                    <p className="font-medium">
+                      RM {sublet.rental_price_per_month?.toFixed(2)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Status</p>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${sublet.status === "available"
+                        ? "bg-green-100 text-green-800"
+                        : sublet.status === "half occupied"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                        }`}
+                    >
+                      {sublet.status}
+                    </span>
+                  </div>
                 </div>
-              )}
-            </>
+              </div>
+            ))
           )}
         </div>
       </div>

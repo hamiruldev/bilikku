@@ -30,7 +30,7 @@ export default function ProfilePage() {
       if (!user?.id) return;
       try {
         const record = await userAPI.getProfile(user.id);
-        const referal_name = await userAPI.getUsername(pb, record.referal_code)
+        const referal_name = await userAPI.getUsername(record.referal_code)
 
         setProfile({
           ...record,

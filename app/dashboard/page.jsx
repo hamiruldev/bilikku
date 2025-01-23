@@ -1,110 +1,46 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   HomeIcon,
   UsersIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
-  BellIcon,
   BuildingOfficeIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext';
-import { dashboardAPI } from '../../services/api';
-import { authGuard } from '../../lib/helpers';
+import { useAdminDashboardStats } from '../../hooks/useQueries';
+import { LOV } from '../../services/api';
 
 export default function DashboardPage() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
-  const hasLoadedRef = useRef(false);
-  const [adminStats, setAdminStats] = useState({
-    totalRooms: 0,
-    occupiedRooms: 0,
-    availableRooms: 0,
-    totalTenants: 0,
-    pendingPayments: 0,
-    monthlyRevenue: 0,
-  });
-  const [tenantStats, setTenantStats] = useState({
-    roomNumber: '',
-    rentDueDate: '',
-    rentAmount: 0,
-    pendingPayments: 0,
-    lastPaymentDate: '',
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [initializing, setInitializing] = useState(true);
 
-  // let hasLoaded = false;
+  const {
+    data: adminStats = {
+      totalRooms: 0,
+      occupiedRooms: 0,
+      availableRooms: 0,
+      totalTenants: 0,
+      pendingPayments: 0,
+      monthlyRevenue: 0,
+    },
+    isLoading: statsLoading,
+    error: statsError
+  } = useAdminDashboardStats();
+
 
   // Check for admin access
   useEffect(() => {
-    // Wait for auth to be ready
-    if (isLoading) return;
-
-    // Then check user object when it's available
+    if (authLoading) return;
     if (!user) {
       router.replace('/login');
-      return;
     }
+  }, [user, authLoading, router]);
 
-    setInitializing(false);
-  }, [user, isLoading, router]);
-
-  // Load dashboard data
-  useEffect(() => {
-    if (isLoading || !user || hasLoadedRef.current) return;
-
-    let isSubscribed = true;
-
-    const loadDashboardData = async () => {
-      setLoading(true);
-      try {
-        const stats = await dashboardAPI.getAdminStats();
-        if (isSubscribed) {
-          setAdminStats(stats);
-          setError(null);
-          hasLoadedRef.current = true;
-        }
-      } catch (error) {
-        console.error('Error loading dashboard data:', error);
-        if (isSubscribed) {
-          setError(error?.message || 'Failed to load dashboard data');
-        }
-      } finally {
-        if (isSubscribed) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // if (hasLoaded) {
-    //   return;
-    // }
-
-    loadDashboardData();
-    // hasLoaded = true;
-
-    return () => {
-      isSubscribed = false;
-    };
-  }, [user, isLoading]);
-
-  // Reset hasLoaded ref when component unmounts
-  useEffect(() => {
-    return () => {
-      hasLoadedRef.current = false;
-    };
-  }, []);
-
-  // Don't render anything until we know the user's role
-  if (initializing) {
-    return null;
-  }
-
-  if (loading) {
+  // Show loading state
+  if (authLoading || statsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -115,11 +51,12 @@ export default function DashboardPage() {
     );
   }
 
-  if (error) {
+  // Show error state
+  if (statsError) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-destructive mb-4">Error: {error}</div>
+          <div className="text-destructive mb-4">Error: {statsError.message}</div>
           <button
             onClick={() => window.location.reload()}
             className="bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
@@ -130,6 +67,7 @@ export default function DashboardPage() {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen bg-background relative">
@@ -169,7 +107,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-
           <QuickActionButton
             icon={<BuildingOfficeIcon className="w-5 h-5" />}
             label="Add Sublet"

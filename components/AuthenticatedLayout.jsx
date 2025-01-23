@@ -32,9 +32,6 @@ export function AuthenticatedLayout({ children }) {
     (user.role === 'guest')
   );
 
-
-  console.log("user", user)
-
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}

@@ -99,7 +99,7 @@ export const userAPI = {
     }
   },
 
-  getUsername: async (pb, userId) => {
+  getUsername: async (userId) => {
     try {
       if (!userId) return null;
 
@@ -498,5 +498,13 @@ export const authAPI = {
     }
 
     return null;
+  },
+};
+
+export const LOV = {
+  getUsers: async (page = 1, perPage = 50, options = {}) => {
+    return await pb.collection("userku_lov").getFullList(page, perPage, {
+      sort: "-created",
+    });
   },
 };

@@ -3,16 +3,14 @@
 import { useLanguage } from '../context/LanguageContext';
 
 export function LoadingTable() {
-  const { t } = useLanguage();
-  
-  return (
-    <tr>
-      <td colSpan="6" className="text-center py-12">
-        <div className="flex flex-col items-center justify-center">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4"></div>
-          <p className="text-muted-foreground">{t('common.loading')}</p>
+    const { t } = useLanguage();
+
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center">
+                <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+                <p className="mt-4 text-muted-foreground">Loading...</p>
+            </div>
         </div>
-      </td>
-    </tr>
-  );
+    );
 } 

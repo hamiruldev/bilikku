@@ -1,20 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { useRouter } from 'next/navigation';
 import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { formatDate } from '../../../lib/helpers';
 import { LoadingTable } from '../../../components/LoadingTable';
-import { tenantAPI } from '../../../services/api';
+import { useDeleteTenant, useTenants } from '../../../hooks/useQueries';
 
 // Separate component for tenant table content
-function TenantsTableContent({ tenants, onDelete, t, locale, isLoading }) {
-    if (isLoading) {
-        return <LoadingTable />;
-    }
-
+function TenantsTableContent({ tenants, onDelete, t, locale }) {
     if (!tenants || tenants.length === 0) {
         return (
             <tr>
@@ -25,99 +20,99 @@ function TenantsTableContent({ tenants, onDelete, t, locale, isLoading }) {
         );
     }
 
-    return tenants.map((tenant) => (
-        <tr
-            key={tenant.id}
-            className="border-b border-border/50 last:border-0 hover:bg-secondary/5 transition-colors"
-        >
-            <td className="p-4">{tenant.no_tenants || t('common.notAvailable')}</td>
-            <td className="p-4">
-                {tenant.username || t('common.notAvailable')}
-            </td>
-            <td className="p-4">
-                {tenant.expand?.room_name?.name || t('common.notAvailable')}
-            </td>
-            <td className="p-4">
-                {tenant.lease_start && tenant.lease_end
-                    ? `${formatDate(tenant.lease_start, locale)} - ${formatDate(tenant.lease_end, locale)}`
-                    : t('common.notAvailable')}
-            </td>
-            <td className="p-4">
-                <span className={`px-2 py-1 rounded-full text-sm ${tenant.deposit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {tenant.deposit ? t('tenants.deposit.paid') : t('tenants.deposit.notPaid')}
-                </span>
-            </td>
-            <td className="p-4">
-                <div className="flex items-center justify-end gap-2">
-                    <Link
-                        href={`/dashboard/tenants/${tenant.id}`}
-                        className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
-                        title={t('common.edit')}
-                    >
-                        <PencilIcon className="w-5 h-5" />
-                    </Link>
-                    <button
-                        onClick={() => onDelete(tenant.id)}
-                        className="p-2 hover:bg-destructive/10 text-destructive rounded-full transition-colors"
-                        title={t('common.delete')}
-                    >
-                        <TrashIcon className="w-5 h-5" />
-                    </button>
-                </div>
-            </td>
-        </tr>
-    ));
+    return tenants.map((tenant) => {
+        console.log("LOV", LOV)
+
+        const user = LOV.users.find(item => item.id == tenant.tenant_name)
+        const room = LOV.rooms.find(item => item.id == tenant.room_name)
+
+
+        return (
+            <tr
+                key={tenant.id}
+                className="border-b border-border/50 last:border-0 hover:bg-secondary/5 transition-colors"
+            >
+                <td className="p-4">{tenant.no_tenants || t('common.notAvailable')}</td>
+                <td className="p-4">
+                    {user?.username || t('common.notAvailable')}
+                </td>
+                <td className="p-4">
+                    {room?.name || t('common.notAvailable')}
+                </td>
+                <td className="p-4">
+                    {tenant.lease_start && tenant.lease_end
+                        ? `${formatDate(tenant.lease_start, locale)} - ${formatDate(tenant.lease_end, locale)}`
+                        : t('common.notAvailable')}
+                </td>
+                <td className="p-4">
+                    <span className={`px-2 py-1 rounded-full text-sm ${tenant.deposit ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {tenant.deposit ? t('tenants.deposit.paid') : t('tenants.deposit.notPaid')}
+                    </span>
+                </td>
+                <td className="p-4">
+                    <div className="flex items-center justify-end gap-2">
+                        <Link
+                            href={`/dashboard/tenants/${tenant.id}`}
+                            className="p-2 hover:bg-secondary/50 rounded-full transition-colors"
+                            title={t('common.edit')}
+                        >
+                            <PencilIcon className="w-5 h-5" />
+                        </Link>
+                        <button
+                            onClick={() => onDelete(tenant.id)}
+                            className="p-2 hover:bg-destructive/10 text-destructive rounded-full transition-colors"
+                            title={t('common.delete')}
+                        >
+                            <TrashIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        );
+    });
 }
 
 export default function TenantsPage() {
     const { t, locale } = useLanguage();
-    const [tenants, setTenants] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    let hasLoaded = false;
 
-    const loadTenants = async () => {
-        if (hasLoaded) return;
-        hasLoaded = true;
+    const {
+        data: tenants = [],
+        isLoading,
+        error
+    } = useTenants();
 
-        try {
-            const tenantsWithDetails = await tenantAPI.getListWithDetails();
-            setTenants(tenantsWithDetails);
-            setError('');
-        } catch (err) {
-            console.error('Error loading tenants:', err);
-            setError(err.message || t('common.error'));
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadTenants();
-    }, []);
+    const deleteTenant = useDeleteTenant();
 
     const handleDelete = async (id) => {
         if (!confirm(t('tenants.deleteConfirm'))) return;
-
         try {
-            setIsLoading(true);
-            await tenantAPI.delete(id);
-            await loadTenants();
+            await deleteTenant.mutateAsync(id);
         } catch (err) {
             console.error('Error deleting tenant:', err);
             alert(err.message || t('common.error'));
-        } finally {
-            setIsLoading(false);
         }
     };
 
-    const filteredTenants = tenants.filter((tenant) => {
+
+    if (isLoading) {
+        return <LoadingTable />;
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="text-destructive">Error: {error.message}</div>
+            </div>
+        );
+    }
+
+    const filteredTenants = tenants.items.filter((tenant) => {
         const searchString = searchTerm.toLowerCase();
         return (
             tenant.no_tenants?.toLowerCase().includes(searchString) ||
             tenant.username?.toLowerCase().includes(searchString) ||
-            tenant.expand?.room_name?.name?.toLowerCase().includes(searchString)
+            tenant.room_name?.toLowerCase().includes(searchString)
         );
     });
 
@@ -142,29 +137,21 @@ export default function TenantsPage() {
                     </Link>
                 </div>
 
-                {error && (
-                    <div className="mb-6 p-4 rounded-lg bg-destructive/10 text-destructive">
-                        {error}
-                    </div>
-                )}
-
                 {/* Search */}
-                <div className="glass-card mb-6">
-                    <div className="p-4">
-                        <div className="relative">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder={t('tenants.searchPlaceholder')}
-                                className="input-field pl-10"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
+                <div className="mb-6">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            className="input-field pl-10 w-full"
+                            placeholder={t('common.search')}
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     </div>
                 </div>
 
-                {/* Tenants Table */}
+                {/* Table */}
                 <div className="glass-card">
                     <div className="overflow-x-auto">
                         <table className="w-full">
@@ -184,7 +171,6 @@ export default function TenantsPage() {
                                     onDelete={handleDelete}
                                     t={t}
                                     locale={locale}
-                                    isLoading={isLoading}
                                 />
                             </tbody>
                         </table>

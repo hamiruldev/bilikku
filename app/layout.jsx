@@ -4,7 +4,10 @@ import { ThemeProvider } from '../components/ThemeProvider';
 import { AuthenticatedLayout } from '../components/AuthenticatedLayout';
 import { AuthProvider } from "../context/AuthContext";
 import { AuthGuard } from "../context/AuthGuard";
+import { LOVProvider } from "../context/LOVProvider";
+
 import { LanguageProvider } from '../context/LanguageContext';
+import { QueryProvider } from '../components/QueryProvider';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,6 +20,8 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`}>
@@ -26,15 +31,19 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <AuthProvider>
-            <LanguageProvider>
-              <AuthGuard>
-                <AuthenticatedLayout>
-                  {children}
-                </AuthenticatedLayout>
-              </AuthGuard>
-            </LanguageProvider>
-          </AuthProvider>
+          <QueryProvider>
+            <AuthProvider>
+              <LanguageProvider>
+                <AuthGuard>
+                  <AuthenticatedLayout>
+                    <LOVProvider>
+                      {children}
+                    </LOVProvider>
+                  </AuthenticatedLayout>
+                </AuthGuard>
+              </LanguageProvider>
+            </AuthProvider>
+          </QueryProvider>
         </ThemeProvider>
       </body>
     </html>
